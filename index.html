@@ -29,7 +29,7 @@
         .badge-tg { background-color: #0088cc; }
         .badge-msg { background-color: #006aff; }
         .user-info { flex: 1; min-width: 0; }
-        .user-name { font-weight: bold; font-size: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .user-name { font-weight: bold; font-size: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
         .msg-time { font-size: 11px; color: #6b7280; font-weight: normal; }
         .last-msg { font-size: 12px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -51,6 +51,7 @@
         .details-name-box { display: flex; align-items: center; gap: 8px; }
         .details-name { font-size: 18px; font-weight: bold; }
         .btn-edit-name { background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 14px; }
+        .info-card { width: 100%; background-color: #1f2937; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
         .info-card { width: 100%; background-color: #1f2937; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
         .info-row { display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding-bottom: 8px; }
         .info-row:last-child { border: none; padding: 0; }
@@ -189,6 +190,7 @@
         let currentActiveUserId = null; 
         let localCustomNames = JSON.parse(localStorage.getItem('CUSTOM_NAMES')) || {};
         let totalMessagesCount = 0;
+        let previousTotalUnread = 0; // ယခင်စုစုပေါင်း မဖတ်ရသေးသော စာအရေအတွက်မှတ်ရန်
 
         // တက်ဘ်များ ကူးပြောင်းရန်
         function showTab(tabId, iconId) {
@@ -239,6 +241,15 @@
                 const response = await fetch(`${BACKEND_URL}/api/messages`);
                 const data = await response.json();
                 
+                // စုစုပေါင်း မဖတ်ရသေးသော စာအရေအတွက်ကို တွက်ချက်ခြင်း
+                let currentTotalUnread = data.users.reduce((sum, u) => sum + (u.unread || 0), 0);
+                
+                // စာအသစ် ထပ်ဝင်လာမှသာ အသံမြည်စေရန် စစ်ဆေးခြင်း
+                if (currentTotalUnread > previousTotalUnread) {
+                    document.getElementById('noti-sound').play().catch(e => console.log("Audio playback raw block handled"));
+                }
+                previousTotalUnread = currentTotalUnread;
+
                 renderUserList(data.users);
                 renderChatStream(data.logs);
                 checkNewIncomingNotification(data.logs);
@@ -264,11 +275,19 @@
                 let platformLabel = user.platform === 'Telegram' ? 'TG' : 'FB';
                 let initial = displayName.charAt(0);
 
+                // မဖတ်ရသေးပါက အနီရောင် Noti Badge ပြသရန် ပုံစံတည်ဆောက်ခြင်း
+                let unreadBadgeHtml = (user.unread && user.unread > 0)
+                    ? `<span style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; font-weight: bold; margin-left: 8px;">${user.unread}</span>`
+                    : '';
+
                 html += `
-                    <div class="user-item ${activeClass}" id="user-node-${user.id}" onclick="selectUser('${displayName}', '${user.platform}', '${user.id}', '${user.gender}')">
+                    <div class="user-item ${activeClass}" id="user-node-${user.id}" onclick="selectUser('${user.name.replace(/'/g, "\\'")}', '${user.platform}', '${user.id}', '${user.gender}')">
                         <div class="avatar">${initial}<div class="platform-badge ${badgeClass}">${platformLabel}</div></div>
                         <div class="user-info">
-                            <div class="user-name"><span>${displayName}</span> <span class="msg-time">${user.time || ''}</span></div>
+                            <div class="user-name">
+                                <span>${displayName} ${unreadBadgeHtml}</span> 
+                                <span class="msg-time">${user.time || ''}</span>
+                            </div>
                             <div class="last-msg">${user.lastMsg || ''}</div>
                         </div>
                     </div>
@@ -278,7 +297,7 @@
         }
 
         // လူတစ်ယောက်ကို ရွေးချယ်လိုက်လျှင် Profile Detail ကို ပြောင်းပေးခြင်း
-        function selectUser(name, platform, id, gender) {
+        async function selectUser(name, platform, id, gender) {
             currentActiveUserId = id;
             let displayName = localCustomNames[id] || name;
 
@@ -294,10 +313,24 @@
             const currentNode = document.getElementById(`user-node-${id}`);
             if(currentNode) currentNode.classList.add('active');
 
+            // စာဖတ်လိုက်ပြီမို့ Noti Count ပိတ်ရန် Server သို့ အကြောင်းကြားခြင်း
+            try {
+                await fetch(`${BACKEND_URL}/api/mark-read`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: id })
+                });
+            } catch (err) {
+                console.log("Read status update skipped");
+            }
+
             // မက်ဆေ့ခ်ျများကို ချက်ချင်း စစ်ထုတ်ပြရန်
             fetch(`${BACKEND_URL}/api/messages`)
                 .then(res => res.json())
-                .then(data => renderChatStream(data.logs));
+                .then(data => {
+                    renderUserList(data.users);
+                    renderChatStream(data.logs);
+                });
         }
 
         // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ အစီအစဉ်တကျ ပြသခြင်း
@@ -333,7 +366,6 @@
                 let lastLog = logs[logs.length - 1];
                 if(lastLog.sender === 'user') {
                     let senderName = localCustomNames[lastLog.userId] || `User ID: ${lastLog.userId}`;
-                    document.getElementById('noti-sound').play();
                     
                     let notiBox = document.getElementById('notification-box');
                     document.getElementById('noti-sender').innerText = `🔔 စာအသစ်ဝင်လာသည် (${senderName})`;
