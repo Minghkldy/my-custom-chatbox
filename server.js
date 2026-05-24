@@ -7,14 +7,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// 🔗 သင်၏ Render URL အစစ်အမှန်ကို ဤနေရာတွင် တိုက်ရိုက်သတ်မှတ်ပေးလိုက်ပါသည်
 const RENDER_BACKEND_URL = "https://my-custom-chatbox.onrender.com"; 
 
-let configStorage = {
-    tgToken: '',
-    fbToken: '',
-    fbVerify: ''
-};
+let configStorage = { tgToken: '', fbToken: '', fbVerify: '' };
 let messageLogs = [];
 let userList = [];
 
@@ -22,24 +17,19 @@ app.get('/', (req, res) => {
     res.send('🚀 Chatbox Backend Server အလုပ်လုပ်နေပါပြီ!');
 });
 
-// Dashboard မှ Token များ လှမ်းသိမ်းသည့်နေရာ
 app.post('/api/save-config', async (req, res) => {
     const { tgToken, fbToken, fbVerify } = req.body;
     configStorage.tgToken = tgToken;
     configStorage.fbToken = fbToken;
     configStorage.fbVerify = fbVerify;
-    console.log('✅ Token များကို Server တွင် သိမ်းဆည်းပြီးပါပြီ');
-
-    // Webhook ကို Render URL အစစ်ဖြင့် အတင်းအကျပ် သတ်မှတ်ခြင်း
+    
     if (tgToken) {
         try {
             const webhookUrl = `${RENDER_BACKEND_URL}/webhook/telegram`;
-            console.log(`📡 Telegram သို့ Webhook Link ပို့နေသည်: ${webhookUrl}`);
-            
-            const tgRes = await axios.get(`https://api.telegram.org/bot${tgToken}/setWebhook?url=${webhookUrl}`);
-            console.log('🟢 Telegram Response:', tgRes.data);
+            await axios.get(`https://api.telegram.org/bot${tgToken}/setWebhook?url=${webhookUrl}`);
+            console.log('✅ Webhook Set Successfully');
         } catch (error) {
-            console.error('❌ Telegram Webhook ချိတ်ဆက်မှု မအောင်မြင်ပါ:', error.response ? error.response.data : error.message);
+            console.error('❌ Webhook Error:', error.message);
         }
     }
     res.sendStatus(200);
@@ -49,9 +39,20 @@ app.get('/api/messages', (req, res) => {
     res.json({ users: userList, logs: messageLogs });
 });
 
+// Admin စာပြန်ပို့လျှင် Unread ကို 0 ပြန်လုပ်ပေးခြင်း
 app.post('/api/send-message', async (req, res) => {
     const { text, userId, platform } = req.body;
     messageLogs.push({ userId, text, sender: 'admin', timestamp: new Date() });
+
+    const user = userList.find(u => u.id == userId);
+    if (user) {
+        user.unread = 0; // စာပြန်လိုက်ပြီမို့ Noti ပိတ်မည်
+        user.lastMsg = text;
+        user.time = 'Just Now';
+        
+        // စာပြန်လိုက်တဲ့သူကိုလည်း အပေါ်ဆုံး ရွှေ့ပေးမည်
+        userList = [user, ...userList.filter(u => u.id != userId)];
+    }
 
     if (platform === 'Telegram' && configStorage.tgToken) {
         try {
@@ -60,15 +61,23 @@ app.post('/api/send-message', async (req, res) => {
                 text: text
             });
         } catch (err) {
-            console.error('❌ Telegram သို့ စာပို့မရပါ:', err.message);
+            console.error('❌ Error sending msg:', err.message);
         }
     }
     res.sendStatus(200);
 });
 
+// စာဖတ်ပြီးကြောင်း/Noti ဖျောက်ကြောင်း API
+app.post('/api/mark-read', (req, res) => {
+    const { userId } = req.body;
+    const user = userList.find(u => u.id == userId);
+    if (user) {
+        user.unread = 0;
+    }
+    res.sendStatus(200);
+});
+
 app.post('/webhook/telegram', (req, res) => {
-    console.log('📥 Telegram Webhook သို့ စာဝင်လာသည်:', JSON.stringify(req.body));
-    
     const message = req.body.message;
     if (message) {
         const chatId = message.chat.id;
@@ -77,32 +86,34 @@ app.post('/webhook/telegram', (req, res) => {
         
         messageLogs.push({ userId: chatId, text, sender: 'user', timestamp: new Date() });
 
-        const userExist = userList.find(u => u.id == chatId);
-        if (!userExist) {
-            userList.push({ id: chatId, name: firstName, platform: 'Telegram', lastMsg: text, gender: 'Not Specified', time: 'Just Now' });
+        const userIdx = userList.findIndex(u => u.id == chatId);
+        
+        if (userIdx !== -1) {
+            // ရှိပြီးသားလူဆိုလျှင် Noti Count တိုးပြီး List ရဲ့ အပေါ်ဆုံး (Index 0) သို့ ပို့မည်
+            const updatedUser = userList[userIdx];
+            updatedUser.lastMsg = text;
+            updatedUser.time = 'Just Now';
+            updatedUser.unread = (updatedUser.unread || 0) + 1;
+            
+            userList.splice(userIdx, 1);
+            userList.unshift(updatedUser);
         } else {
-            userExist.lastMsg = text;
-            userExist.time = 'Just Now';
+            // လူသစ်ဆိုလျှင် အပေါ်ဆုံးကနေ တန်းထည့်မည်
+            userList.unshift({ 
+                id: chatId, 
+                name: firstName, 
+                platform: 'Telegram', 
+                lastMsg: text, 
+                gender: 'Not Specified', 
+                time: 'Just Now',
+                unread: 1 
+            });
         }
     }
     res.sendStatus(200);
 });
 
-app.get('/webhook/messenger', (req, res) => {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
-
-    if (mode && token) {
-        if (mode === 'subscribe' && token === configStorage.fbVerify) {
-            console.log('✅ Facebook Webhook အတည်ပြုချက် အောင်မြင်သည်!');
-            res.status(200).send(challenge);
-        } else {
-            res.sendStatus(403);
-        }
-    }
-});
-
+// Messenger Webhook 
 app.post('/webhook/messenger', (req, res) => {
     const body = req.body;
     if (body.object === 'page') {
@@ -114,12 +125,25 @@ app.post('/webhook/messenger', (req, res) => {
                 
                 messageLogs.push({ userId: senderId, text, sender: 'user', timestamp: new Date() });
 
-                const userExist = userList.find(u => u.id == senderId);
-                if (!userExist) {
-                    userList.push({ id: senderId, name: `FB User ${senderId.substring(0,5)}`, platform: 'Messenger', lastMsg: text, gender: 'Not Specified', time: 'Just Now' });
+                const userIdx = userList.findIndex(u => u.id == senderId);
+                if (userIdx !== -1) {
+                    const updatedUser = userList[userIdx];
+                    updatedUser.lastMsg = text;
+                    updatedUser.time = 'Just Now';
+                    updatedUser.unread = (updatedUser.unread || 0) + 1;
+                    
+                    userList.splice(userIdx, 1);
+                    userList.unshift(updatedUser);
                 } else {
-                    userExist.lastMsg = text;
-                    userExist.time = 'Just Now';
+                    userList.unshift({ 
+                        id: senderId, 
+                        name: `FB User ${senderId.substring(0,5)}`, 
+                        platform: 'Messenger', 
+                        lastMsg: text, 
+                        gender: 'Not Specified', 
+                        time: 'Just Now',
+                        unread: 1 
+                    });
                 }
             }
         });
@@ -129,7 +153,14 @@ app.post('/webhook/messenger', (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`🎯 Server is running on port ${PORT}`);
+app.get('/webhook/messenger', (req, res) => {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+    if (mode && token && mode === 'subscribe' && token === configStorage.fbVerify) {
+        res.status(200).send(challenge);
+    } else { res.sendStatus(403); }
 });
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`🎯 Server running on port ${PORT}`));
