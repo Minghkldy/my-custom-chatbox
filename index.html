@@ -41,6 +41,19 @@
         .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; word-break: break-word; }
         .message.incoming { background-color: #1e293b; color: #f3f4f6; align-self: flex-start; border-bottom-left-radius: 2px; }
         .message.outgoing { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .message img {
+    max-width: 100%;
+    border-radius: 8px;
+    display: block;
+}
+
+/* ပုံသီးသန့်ဖြစ်နေလျှင် နောက်ခံအရောင်နှင့် padding များကို ဖယ်ရှားခြင်း */
+.message:has(img:only-child) {
+    max-width: max-content !important;
+    background-color: transparent !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+}
         .chat-input-container { padding: 15px 20px; background-color: #111827; border-top: 1px solid #1f2937; display: flex; gap: 12px; align-items: center; }
         .chat-input-container input { flex: 1; background-color: #1f2937; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; }
         .chat-input-container button { background-color: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; }
