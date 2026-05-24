@@ -52,7 +52,6 @@
         .details-name { font-size: 18px; font-weight: bold; }
         .btn-edit-name { background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 14px; }
         .info-card { width: 100%; background-color: #1f2937; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
-        .info-card { width: 100%; background-color: #1f2937; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
         .info-row { display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding-bottom: 8px; }
         .info-row:last-child { border: none; padding: 0; }
         .info-label { color: #9ca3af; }
@@ -110,6 +109,9 @@
                     <p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျများကို ဖတ်ရှုရန် လူတစ်ဦးအား ရွေးချယ်ပေးပါ</p>
                 </div>
                 <div class="chat-input-container">
+                    <label for="chat-image-file" style="cursor: pointer; font-size: 20px; color: #9ca3af; user-select: none; transition: 0.2s;" title="Upload Photo">📎</label>
+                    <input type="file" id="chat-image-file" accept="image/*" style="display: none;" onchange="uploadAndSendChatImage(this)">
+                    
                     <input type="text" id="chat-field" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') pushMessage()">
                     <button onclick="pushMessage()">Send</button>
                 </div>
@@ -147,10 +149,14 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Photo URL (Optional)</label>
+                    <input type="text" id="bc-image-url" placeholder="ဥပမာ- https://example.com/image.jpg (ပုံလင့်ခ်ထည့်ရန်)">
+                </div>
+                <div class="form-group">
                     <label>Message Content</label>
                     <textarea id="bc-text" placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့်စာကို ဒီမှာရေးပါ..."></textarea>
                 </div>
-                <button class="btn-danger" onclick="alert('Broadcast Feature Synced!')">Send Broadcast Now 🚀</button>
+                <button class="btn-danger" onclick="executeBroadcast()">Send Broadcast Now 🚀</button>
             </div>
         </div>
 
@@ -241,10 +247,9 @@
                 const response = await fetch(`${BACKEND_URL}/api/messages`);
                 const data = await response.json();
                 
-                // စုစုပေါင်း မဖတ်ရသေးသော စာအရေအတွက်ကို တွက်ချက်ခြင်း
+                // Сonversations စာရင်းကို အမြဲဆွဲယူရန်
                 let currentTotalUnread = data.users.reduce((sum, u) => sum + (u.unread || 0), 0);
                 
-                // စာအသစ် ထပ်ဝင်လာမှသာ အသံမြည်စေရန် စစ်ဆေးခြင်း
                 if (currentTotalUnread > previousTotalUnread) {
                     document.getElementById('noti-sound').play().catch(e => console.log("Audio playback raw block handled"));
                 }
@@ -275,7 +280,6 @@
                 let platformLabel = user.platform === 'Telegram' ? 'TG' : 'FB';
                 let initial = displayName.charAt(0);
 
-                // မဖတ်ရသေးပါက အနီရောင် Noti Badge ပြသရန် ပုံစံတည်ဆောက်ခြင်း
                 let unreadBadgeHtml = (user.unread && user.unread > 0)
                     ? `<span style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; font-weight: bold; margin-left: 8px;">${user.unread}</span>`
                     : '';
@@ -308,12 +312,10 @@
             document.getElementById('det-plat').innerText = platform;
             document.getElementById('det-gen').innerText = gender;
 
-            // အရောင်ပြောင်းရန်
             document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
             const currentNode = document.getElementById(`user-node-${id}`);
             if(currentNode) currentNode.classList.add('active');
 
-            // စာဖတ်လိုက်ပြီမို့ Noti Count ပိတ်ရန် Server သို့ အကြောင်းကြားခြင်း
             try {
                 await fetch(`${BACKEND_URL}/api/mark-read`, {
                     method: 'POST',
@@ -324,7 +326,6 @@
                 console.log("Read status update skipped");
             }
 
-            // မက်ဆေ့ခ်ျများကို ချက်ချင်း စစ်ထုတ်ပြရန်
             fetch(`${BACKEND_URL}/api/messages`)
                 .then(res => res.json())
                 .then(data => {
@@ -338,7 +339,6 @@
             if(!currentActiveUserId) return;
             
             const stream = document.getElementById('chat-stream');
-            // လက်ရှိ စကားပြောနေသူ၏ မက်ဆေ့ခ်ျများကိုသာ ဇကာတင်စစ်ထုတ်မည်
             let activeLogs = logs.filter(log => log.userId == currentActiveUserId);
             
             if(activeLogs.length === 0) {
@@ -349,14 +349,60 @@
             let html = '';
             activeLogs.forEach(log => {
                 let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
-                html += `<div class="message-wrapper"><div class="message ${sideClass}">${log.text}</div></div>`;
+                
+                // လင့်ခ်သည် ပုံလင့်ခ်ဖြစ်နေပါက <img> tag ဖြင့် ပုံအဖြစ် တိုက်ရိုက်ပြသရန် စစ်ဆေးခြင်း
+                const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
+                
+                let renderContent = isImage 
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;" onclick="window.open('${log.text}', '_blank')"/>`
+                    : log.text;
+
+                html += `<div class="message-wrapper"><div class="message ${sideClass}">${renderContent}</div></div>`;
             });
             
-            // လက်ရှိရှိနေသည့် စာမျက်နှာကို အောက်ဆုံးသို့ အော်တိုဆွဲချရန်
             let isScrollAtBottom = stream.scrollHeight - stream.clientHeight <= stream.scrollTop + 100;
             stream.innerHTML = html;
             if(isScrollAtBottom || totalMessagesCount === 0) {
                 stream.scrollTop = stream.scrollHeight;
+            }
+        }
+
+        // 📷 ကွန်ပျူတာ/ဖုန်းထဲမှ ပုံရွေးပြီး တိုက်ရိုက် Upload လုပ်၍ ပို့မည့် စနစ်သစ်
+        async function uploadAndSendChatImage(input) {
+            if (!input.files || !input.files[0] || !currentActiveUserId) return;
+            
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('image', file);
+
+            let platform = document.getElementById('det-plat').innerText;
+            let userId = document.getElementById('det-id').innerText;
+
+            try {
+                // အခမဲ့ ImgBB API သုံး၍ ပုံအား Direct Image Link ပြောင်းလဲခြင်း
+                const res = await fetch('https://api.imgbb.com/1/upload?key=6d3883a65fc8e03e7e9be1c5483f9825', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+                
+                if(data.success) {
+                    const uploadedUrl = data.data.url;
+                    
+                    // Server သို့ ပုံလင့်ခ် ပို့ဆောင်ခြင်း
+                    await fetch(`${BACKEND_URL}/api/send-message`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: uploadedUrl, userId, platform })
+                    });
+                    
+                    input.value = ""; // ဖိုင်ရွေးထားသည်ကို Reset လုပ်ခြင်း
+                } else {
+                    alert("ပုံတင်ခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားကြည့်ပါ။");
+                }
+            } catch (err) {
+                console.error("Image Upload Error:", err);
+                alert("ပုံတင်ရာတွင် ချိတ်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
             }
         }
 
@@ -369,7 +415,10 @@
                     
                     let notiBox = document.getElementById('notification-box');
                     document.getElementById('noti-sender').innerText = `🔔 စာအသစ်ဝင်လာသည် (${senderName})`;
-                    document.getElementById('noti-text').innerText = lastLog.text;
+                    
+                    // Noti Box ထဲတွင် ပုံလင့်ခ်ဖြစ်ပါက 📷 Photo ဟုပြရန်
+                    const isImg = lastLog.text.startsWith('http') && (lastLog.text.match(/\.(jpeg|jpg|gif|png)$/) || lastLog.text.includes('file/bot'));
+                    document.getElementById('noti-text').innerText = isImg ? "📷 Send you a photo" : lastLog.text;
                     
                     notiBox.style.display = "flex";
                     setTimeout(() => notiBox.style.display = "none", 4000);
@@ -391,7 +440,6 @@
                 localCustomNames[currentId] = newName;
                 localStorage.setItem('CUSTOM_NAMES', JSON.stringify(localCustomNames));
                 
-                // UI များကို ချက်ချင်း Update လုပ်ခြင်း
                 document.getElementById('det-name').innerText = newName;
                 document.getElementById('det-av').innerText = newName.charAt(0);
                 document.getElementById('active-chat-title').innerText = `💬 Chatting with ${newName}`;
@@ -407,13 +455,11 @@
             let platform = document.getElementById('det-plat').innerText;
             let userId = document.getElementById('det-id').innerText;
 
-            // UI တွင် ချက်ချင်းကြိုတင်ပြသထားရန်
             let stream = document.getElementById('chat-stream');
             stream.innerHTML += `<div class="message-wrapper"><div class="message outgoing">${text}</div></div>`;
             input.value = "";
             stream.scrollTop = stream.scrollHeight;
 
-            // Server မှတစ်ဆင့် သက်ဆိုင်ရာ Platform ဆီ ပို့ခြင်း
             try {
                 await fetch(`${BACKEND_URL}/api/send-message`, {
                     method: 'POST',
@@ -422,6 +468,36 @@
                 });
             } catch (e) {
                 console.error("စာပို့ရန် အခက်အခဲရှိနေသည်:", e);
+            }
+        }
+
+        // 📢 စာသားရော ဓာတ်ပုံလင့်ခ်ပါ ပူးတွဲပို့နိုင်မည့် Broadcast စနစ်သစ် လုပ်ဆောင်ချက်
+        async function executeBroadcast() {
+            const text = document.getElementById('bc-text').value.trim();
+            const imageUrl = document.getElementById('bc-image-url').value.trim();
+
+            if (!text && !imageUrl) {
+                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ။");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/broadcast`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, imageUrl })
+                });
+                
+                if (response.ok) {
+                    alert("📢 Broadcast Message ကို လူတိုင်းဆီ အောင်မြင်စွာ ဖြန့်ဝေပြီးပါပြီဗျာ!");
+                    document.getElementById('bc-text').value = "";
+                    document.getElementById('bc-image-url').value = "";
+                } else {
+                    alert("Broadcast ပို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("ဆာဗာနှင့် ချိတ်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
             }
         }
 
