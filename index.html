@@ -38,7 +38,7 @@
         .chat-header { height: 60px; background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; align-items: center; padding: 0 20px; font-weight: bold; justify-content: space-between; }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message-wrapper { display: flex; flex-direction: column; width: 100%; }
-        .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; word-break: break-word; }
+       .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; word-break: break-word; white-space: pre-wrap; }
         .message.incoming { background-color: #1e293b; color: #f3f4f6; align-self: flex-start; border-bottom-left-radius: 2px; }
         .message.outgoing { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .message img {
@@ -289,7 +289,7 @@
             }
         }
 
-        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
+       // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
         window.onload = function() {
             if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
             if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
@@ -308,6 +308,36 @@
                     closeImageZoomModal();
                 }
             });
+
+            // 📷 ညှပ်ထည့်ချက် - Send Box တွင် ပုံများကို Copy Paste (Ctrl + V) ချ၍ ပို့နိုင်မည့်စနစ်သစ်
+            const chatField = document.getElementById('chat-field');
+            if (chatField) {
+                chatField.addEventListener('paste', async function(e) {
+                    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                    for (let index in items) {
+                        const item = items[index];
+                        if (item.kind === 'file' && item.type.startsWith('image/')) {
+                            // ပုံတွေ့ရှိပါက Clipboard ထဲမှ ပုံဖိုင်ကို ဆွဲယူခြင်း
+                            const blob = item.getAsFile();
+                            
+                            // အသုံးပြုသူအား ပုံပို့နေပြီဖြစ်ကြောင်း သိစေရန် အချက်ပြခြင်း
+                            chatField.placeholder = "📷 Uploading image, please wait...";
+                            chatField.disabled = true;
+
+                            // စနစ်ဟောင်းထဲက uploadAndSendChatImage စနစ်ဆီသို့ Form ဒေတာဖြင့် လွှဲပြောင်းပို့ဆောင်ခြင်း
+                            const mockInput = { files: [blob] };
+                            await uploadAndSendChatImage(mockInput);
+
+                            // ပုံပို့ပြီးပါက Send Box ကို ပုံမှန်အတိုင်း ပြန်ပြင်ခြင်း
+                            chatField.placeholder = "Type a message...";
+                            chatField.disabled = false;
+                            chatField.focus();
+                            
+                            e.preventDefault(); // စာရိုက်ကွက်ထဲတွင် [object File] ဟု စာသားပေါ်မလာစေရန် တားဆီးခြင်း
+                        }
+                    }
+                });
+            }
         }
 
         // 🆕 Image Zoom Modal ဖွင့်ရန် Function
