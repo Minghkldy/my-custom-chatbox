@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chatrace Style Inbox - Pro</title>
+    <title>UWINMM Inbox - Pro</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; overflow: hidden; }
@@ -98,7 +98,7 @@
     <div id="notification-box" class="noti-toast">
         <span style="font-size: 20px;">💬</span>
         <div>
-            <b id="noti-sender" style="color: white; display: block; font-size: 14px;">စာအသစ် ဝင်လာပါသည်</b>
+            <b id="noti-sender" style="color: white; display: block; font-size: 14px;">ဝင်စာအသစ်</b>
             <span id="noti-text" style="color: #9ca3af; font-size: 12px;">မက်ဆေ့ခ်ျပြရန်</span>
         </div>
     </div>
@@ -175,7 +175,7 @@
                 </div>
                 <div class="form-group">
                     <label>Message Content</label>
-                    <textarea id="bc-text" placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့်စာကို ဒီမှာရေးပါ..."></textarea>
+                    <textarea id="bc-text" placeholder="စာရေးရန် ဒီမှာရေးပါ..."></textarea>
                 </div>
                 <button class="btn-danger" onclick="executeBroadcast()">Send Broadcast Now 🚀</button>
             </div>
@@ -253,9 +253,9 @@
                 });
                 if(response.ok) {
                     if (type === 'tg') {
-                        alert("✅ Telegram Bot Token ကို အောင်မြင်စွာ ချိတ်ဆက်သိမ်းဆည်းပြီးပါပြီဗျာ!");
+                        alert("✅ Telegram Bot Token ကို ချိတ်ဆက်မူအောင်မြင်ပါသည်!");
                     } else {
-                        alert("✅ Facebook Messenger Settings များကို အောင်မြင်စွာ ချိတ်ဆက်သိမ်းဆည်းပြီးပါပြီဗျာ!");
+                        alert("✅ Facebook Messenger Settings ကို ချိတ်ဆက်မူအောင်မြင်ပါသည်!");
                     }
                 }
             } catch (err) {
