@@ -7,9 +7,14 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// 🔗 သင်၏ Render URL အစစ်အမှန်ကို ဤနေရာတွင် တိုက်ရိုက်သတ်မှတ်ပေးလိုက်ပါသည်
 const RENDER_BACKEND_URL = "https://my-custom-chatbox.onrender.com"; 
 
-let configStorage = { tgToken: '', fbToken: '', fbVerify: '' };
+let configStorage = {
+    tgToken: '',
+    fbToken: '',
+    fbVerify: ''
+};
 let messageLogs = [];
 let userList = [];
 
@@ -17,19 +22,24 @@ app.get('/', (req, res) => {
     res.send('🚀 Chatbox Backend Server အလုပ်လုပ်နေပါပြီ!');
 });
 
+// Dashboard မှ Token များ လှမ်းသိမ်းသည့်နေရာ
 app.post('/api/save-config', async (req, res) => {
     const { tgToken, fbToken, fbVerify } = req.body;
     configStorage.tgToken = tgToken;
     configStorage.fbToken = fbToken;
     configStorage.fbVerify = fbVerify;
-    
+    console.log('✅ Token များကို Server တွင် သိမ်းဆည်းပြီးပါပြီ');
+
+    // Webhook ကို Render URL အစစ်ဖြင့် အတင်းအကျပ် သတ်မှတ်ခြင်း
     if (tgToken) {
         try {
             const webhookUrl = `${RENDER_BACKEND_URL}/webhook/telegram`;
-            await axios.get(`https://api.telegram.org/bot${tgToken}/setWebhook?url=${webhookUrl}`);
-            console.log('✅ Webhook Set Successfully');
+            console.log(`📡 Telegram သို့ Webhook Link ပို့နေသည်: ${webhookUrl}`);
+            
+            const tgRes = await axios.get(`https://api.telegram.org/bot${tgToken}/setWebhook?url=${webhookUrl}`);
+            console.log('🟢 Telegram Response:', tgRes.data);
         } catch (error) {
-            console.error('❌ Webhook Error:', error.message);
+            console.error('❌ Telegram Webhook ချိတ်ဆက်မှု မအောင်မြင်ပါ:', error.response ? error.response.data : error.message);
         }
     }
     res.sendStatus(200);
@@ -39,18 +49,16 @@ app.get('/api/messages', (req, res) => {
     res.json({ users: userList, logs: messageLogs });
 });
 
-// Admin စာပြန်ပို့လျှင် Unread ကို 0 ပြန်လုပ်ပေးခြင်း
 app.post('/api/send-message', async (req, res) => {
     const { text, userId, platform } = req.body;
     messageLogs.push({ userId, text, sender: 'admin', timestamp: new Date() });
 
+    // Admin ဘက်က စာပြန်လိုက်လျှင် ၎င်း User ၏ Unread ကို ၀ ပြန်လုပ်ပေးပြီး စာရင်းထိပ်ဆုံးသို့ ပို့ပေးခြင်း
     const user = userList.find(u => u.id == userId);
     if (user) {
-        user.unread = 0; // စာပြန်လိုက်ပြီမို့ Noti ပိတ်မည်
+        user.unread = 0;
         user.lastMsg = text;
         user.time = 'Just Now';
-        
-        // စာပြန်လိုက်တဲ့သူကိုလည်း အပေါ်ဆုံး ရွှေ့ပေးမည်
         userList = [user, ...userList.filter(u => u.id != userId)];
     }
 
@@ -61,13 +69,13 @@ app.post('/api/send-message', async (req, res) => {
                 text: text
             });
         } catch (err) {
-            console.error('❌ Error sending msg:', err.message);
+            console.error('❌ Telegram သို့ စာပို့မရပါ:', err.message);
         }
     }
     res.sendStatus(200);
 });
 
-// စာဖတ်ပြီးကြောင်း/Noti ဖျောက်ကြောင်း API
+// index.html မှ စာဖတ်လိုက်သည့်အခါ Noti ဖျောက်ပေးရန် API အသစ်
 app.post('/api/mark-read', (req, res) => {
     const { userId } = req.body;
     const user = userList.find(u => u.id == userId);
@@ -78,6 +86,8 @@ app.post('/api/mark-read', (req, res) => {
 });
 
 app.post('/webhook/telegram', (req, res) => {
+    console.log('📥 Telegram Webhook သို့ စာဝင်လာသည်:', JSON.stringify(req.body));
+    
     const message = req.body.message;
     if (message) {
         const chatId = message.chat.id;
@@ -87,12 +97,12 @@ app.post('/webhook/telegram', (req, res) => {
         messageLogs.push({ userId: chatId, text, sender: 'user', timestamp: new Date() });
 
         const userIdx = userList.findIndex(u => u.id == chatId);
-        
         if (userIdx !== -1) {
-            // ရှိပြီးသားလူဆိုလျှင် Noti Count တိုးပြီး List ရဲ့ အပေါ်ဆုံး (Index 0) သို့ ပို့မည်
+            // ရှိပြီးသားလူဆိုလျှင် Noti တိုးပြီး List ရဲ့ ထိပ်ဆုံး (Index 0) သို့ ရွှေ့မည်
             const updatedUser = userList[userIdx];
             updatedUser.lastMsg = text;
             updatedUser.time = 'Just Now';
+            // လက်ရှိ Chat Area တွင် ဖွင့်မထားမှသာ Unread Count တိုးမည်
             updatedUser.unread = (updatedUser.unread || 0) + 1;
             
             userList.splice(userIdx, 1);
@@ -113,7 +123,21 @@ app.post('/webhook/telegram', (req, res) => {
     res.sendStatus(200);
 });
 
-// Messenger Webhook 
+app.get('/webhook/messenger', (req, res) => {
+    const mode = req.query['hub.mode'];
+    const token = req.query['hub.verify_token'];
+    const challenge = req.query['hub.challenge'];
+
+    if (mode && token) {
+        if (mode === 'subscribe' && token === configStorage.fbVerify) {
+            console.log('✅ Facebook Webhook အတည်ပြုချက် အောင်မြင်သည်!');
+            res.status(200).send(challenge);
+        } else {
+            res.sendStatus(403);
+        }
+    }
+});
+
 app.post('/webhook/messenger', (req, res) => {
     const body = req.body;
     if (body.object === 'page') {
@@ -127,6 +151,7 @@ app.post('/webhook/messenger', (req, res) => {
 
                 const userIdx = userList.findIndex(u => u.id == senderId);
                 if (userIdx !== -1) {
+                    // ရှိပြီးသားလူဆိုလျှင် Noti တိုးပြီး ထိပ်ဆုံးသို့ ပို့မည်
                     const updatedUser = userList[userIdx];
                     updatedUser.lastMsg = text;
                     updatedUser.time = 'Just Now';
@@ -135,6 +160,7 @@ app.post('/webhook/messenger', (req, res) => {
                     userList.splice(userIdx, 1);
                     userList.unshift(updatedUser);
                 } else {
+                    // လူသစ်ဆိုလျှင် ထိပ်ဆုံးက ထည့်မည်
                     userList.unshift({ 
                         id: senderId, 
                         name: `FB User ${senderId.substring(0,5)}`, 
@@ -153,14 +179,7 @@ app.post('/webhook/messenger', (req, res) => {
     }
 });
 
-app.get('/webhook/messenger', (req, res) => {
-    const mode = req.query['hub.mode'];
-    const token = req.query['hub.verify_token'];
-    const challenge = req.query['hub.challenge'];
-    if (mode && token && mode === 'subscribe' && token === configStorage.fbVerify) {
-        res.status(200).send(challenge);
-    } else { res.sendStatus(403); }
-});
-
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🎯 Server running on port ${PORT}`));
+app.listen(PORT, () => {
+    console.log(`🎯 Server is running on port ${PORT}`);
+});
