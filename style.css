@@ -1,9 +1,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
 body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; overflow: hidden; }
 
-/* 🆕 APP MULTI-TAB LAYOUT CONTAINER (STRUCTURE မှန်အောင် ဖြည့်စွက်ပြင်ဆင်ခြင်း) */
-.app-layout { display: flex; width: 100vw; height: 100vh; overflow: hidden; }
-
 /* 1. ဘယ်ဘက်အစွန်းဆုံး ပင်မ Menu Bar */
 .main-sidebar { width: 70px; background-color: #080d16; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; border-right: 1px solid #1f2937; flex-shrink: 0; }
 .menu-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 20px; color: #9ca3af; transition: 0.2s; }
@@ -11,14 +8,10 @@ body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; 
 
 /* Main App Content Wrapper */
 .app-container { flex: 1; display: flex; position: relative; overflow: hidden; }
-.page { display: none !important; width: 100%; height: 100%; overflow: hidden; }
 
-/* 🆕 PAGE ACTIVE ဖြစ်ချိန်တွင် SETTINGS & BROADCAST ပါ အလယ်တည့်တည့် ရောက်အောင် ညှိခြင်း */
-.page.active { 
-    display: flex !important; 
-    justify-content: center; /* စာမျက်နှာများကို အလျားလိုက် အလယ်တည့်တည့် ပို့ပေးရန် */
-    align-items: center;     /* စာမျက်နှာများကို ဒေါင်လိုက် အလယ်တည့်တည့် ပို့ပေးရန် */
-}
+/* ⚠️ Fix: .page dynamic display ကို မူလစတိုင်အတိုင်း ပြန်ပြင်ဆင်ခြင်း */
+.page { display: none !important; width: 100%; height: 100%; overflow: hidden; }
+.page.active { display: flex !important; }
 
 /* Placeholder များ မျက်နှာပြင် အပြည့် ဖြစ်စေရန် */
 #broadcast-placeholder, #settings-placeholder { width: 100%; height: 100%; display: flex; overflow: hidden; }
@@ -61,11 +54,11 @@ body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; 
 .info-row:last-child { border: none; padding: 0; }
 .info-label { color: #9ca3af; }
 
-/* SETTINGS & BROADCAST VIEWS (ဘယ်ဘက်ကပ်မနေစေဘဲ အလယ်ဗဟိုကျအောင် ပြင်ဆင်ခြင်း) */
-.panel-view { padding: 40px; display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 700px; margin: auto auto; overflow-y: auto; height: auto; max-height: 90vh; background-color: #111827; border: 1px solid #1f2937; border-radius: 8px; }
+/* SETTINGS & BROADCAST VIEWS (အလယ်ဗဟိုကျကျနှင့် Layout လုံးဝမပျက်စေရန် စနစ်တကျ ပြင်ဆင်ပြီး) */
+.panel-view { padding: 40px; display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; height: 100%; }
 .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; width: 100%; }
 .form-group label { font-size: 14px; font-weight: bold; color: #9ca3af; }
-.form-group input, .form-group select, .form-group textarea { background-color: #1f2937; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; width: 100%; }
+.form-group input, .form-group select, .form-group textarea { background-color: #111827; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; width: 100%; }
 .form-group textarea { height: 120px; resize: none; }
 .btn-primary { background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
 .btn-danger { background-color: #dc2626; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
