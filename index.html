@@ -97,15 +97,19 @@
         function showTab(tabId, iconId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.menu-icon').forEach(i => i.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
-            document.getElementById(iconId).classList.add('active');
+            
+            const targetTab = document.getElementById(tabId);
+            if(targetTab) targetTab.classList.add('active');
+            
+            const targetIcon = document.getElementById(iconId);
+            if(targetIcon) targetIcon.classList.add('active');
         }
 
         // 🆕 API Keys များကို တစ်ခုချင်းစီ ခွဲပြီး သိမ်းဆည်းပေးမည့် လုပ်ဆောင်ချက်အသစ်
         async function saveSingleSetting(type) {
-            let tgToken = document.getElementById('storage-tg-token').value.trim();
-            let fbToken = document.getElementById('storage-fb-token').value.trim();
-            let fbVerify = document.getElementById('storage-fb-verify').value.trim();
+            let tgToken = document.getElementById('storage-tg-token') ? document.getElementById('storage-tg-token').value.trim() : '';
+            let fbToken = document.getElementById('storage-fb-token') ? document.getElementById('storage-fb-token').value.trim() : '';
+            let fbVerify = document.getElementById('storage-fb-verify') ? document.getElementById('storage-fb-verify').value.trim() : '';
 
             if (type === 'tg') {
                 localStorage.setItem('TG_TOKEN', tgToken);
@@ -135,9 +139,9 @@
 
         // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း (အဟောင်း)
         async function saveSettingsToLocal() {
-            let tgToken = document.getElementById('storage-tg-token').value.trim();
-            let fbToken = document.getElementById('storage-fb-token').value.trim();
-            let fbVerify = document.getElementById('storage-fb-verify').value.trim();
+            let tgToken = document.getElementById('storage-tg-token') ? document.getElementById('storage-tg-token').value.trim() : '';
+            let fbToken = document.getElementById('storage-fb-token') ? document.getElementById('storage-fb-token').value.trim() : '';
+            let fbVerify = document.getElementById('storage-fb-verify') ? document.getElementById('storage-fb-verify').value.trim() : '';
 
             localStorage.setItem('TG_TOKEN', tgToken);
             localStorage.setItem('FB_TOKEN', fbToken);
@@ -174,9 +178,11 @@
                 .then(htmlData => {
                     document.getElementById('settings-placeholder').innerHTML = htmlData;
                     // ဖိုင်ဆွဲပြီးမှ input values များကို ပြန်ထည့်ပေးခြင်း
-                    if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
-                    if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
-                    if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
+                    setTimeout(() => {
+                        if(localStorage.getItem('TG_TOKEN') && document.getElementById('storage-tg-token')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
+                        if(localStorage.getItem('FB_TOKEN') && document.getElementById('storage-fb-token')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
+                        if(localStorage.getItem('FB_VERIFY') && document.getElementById('storage-fb-verify')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
+                    }, 200);
                 })
                 .catch(err => console.error("Settings ဖိုင်ဆွဲယူရာတွင် အမှားရှိသည် - ", err));
 
@@ -237,6 +243,7 @@
         // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း
         function renderUserList(users) {
             const container = document.getElementById('users-container');
+            if(!container) return;
             if(users.length === 0) {
                 container.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>`;
                 return;
@@ -309,6 +316,7 @@
             if(!currentActiveUserId) return;
             
             const stream = document.getElementById('chat-stream');
+            if(!stream) return;
             let activeLogs = logs.filter(log => log.userId == currentActiveUserId);
             
             if(activeLogs.length === 0) {
@@ -444,11 +452,11 @@
 
         // 📢 စာသားရော ဓာတ်ပုံလင့်ခ်ပါ ပူးတွဲပို့နိုင်မည့် Broadcast စနစ်သစ် လုပ်ဆောင်ချက်
         async function executeBroadcast() {
-            const text = document.getElementById('bc-text').value.trim();
-            const imageUrl = document.getElementById('bc-image-url').value.trim();
+            const text = document.getElementById('bc-text') ? document.getElementById('bc-text').value.trim() : '';
+            const imageUrl = document.getElementById('bc-image-url') ? document.getElementById('bc-image-url').value.trim() : '';
 
             if (!text && !imageUrl) {
-                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ।");
+                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ။");
                 return;
             }
 
@@ -461,8 +469,8 @@
                 
                 if (response.ok) {
                     alert("📢 Broadcast Message ကို လူတိုင်းဆီ အောင်မြင်စွာ ဖြန့်ဝေပြီးပါပြီဗျာ!");
-                    document.getElementById('bc-text').value = "";
-                    document.getElementById('bc-image-url').value = "";
+                    if(document.getElementById('bc-text')) document.getElementById('bc-text').value = "";
+                    if(document.getElementById('bc-image-url')) document.getElementById('bc-image-url').value = "";
                 } else {
                     alert("Broadcast ပို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
                 }
