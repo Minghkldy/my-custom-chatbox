@@ -7,7 +7,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ဒေတာများကို ခေတ္တသိမ်းဆည်းထားမည့် Memory Storage
+// 🔗 သင်၏ Render URL အစစ်အမှန်ကို ဤနေရာတွင် တိုက်ရိုက်သတ်မှတ်ပေးလိုက်ပါသည်
+const RENDER_BACKEND_URL = "https://my-custom-chatbox.onrender.com"; 
+
 let configStorage = {
     tgToken: '',
     fbToken: '',
@@ -16,12 +18,11 @@ let configStorage = {
 let messageLogs = [];
 let userList = [];
 
-// ၁။ Server အလုပ်လုပ်၊ မလုပ် စမ်းသပ်ရန် လမ်းကြောင်း
 app.get('/', (req, res) => {
     res.send('🚀 Chatbox Backend Server အလုပ်လုပ်နေပါပြီ!');
 });
 
-// ၂။ Dashboard ကနေ Token တွေလှမ်းသိမ်းရင် လက်ခံမည့်နေရာ (ဒီအပိုင်း လိုအပ်နေခဲ့တာပါ)
+// Dashboard မှ Token များ လှမ်းသိမ်းသည့်နေရာ
 app.post('/api/save-config', async (req, res) => {
     const { tgToken, fbToken, fbVerify } = req.body;
     configStorage.tgToken = tgToken;
@@ -29,29 +30,27 @@ app.post('/api/save-config', async (req, res) => {
     configStorage.fbVerify = fbVerify;
     console.log('✅ Token များကို Server တွင် သိမ်းဆည်းပြီးပါပြီ');
 
-    // Telegram Webhook ကို Bot ထံသို့ အလိုအလျောက် သွားရောက်ချိတ်ဆက်ပေးခြင်း
+    // Webhook ကို Render URL အစစ်ဖြင့် အတင်းအကျပ် သတ်မှတ်ခြင်း
     if (tgToken) {
         try {
-            const webhookUrl = `${req.protocol}://${req.get('host')}/webhook/telegram`;
-            await axios.get(`https://api.telegram.org/bot${tgToken}/setWebhook?url=${webhookUrl}`);
-            console.log(`🔗 Telegram Webhook Set Successfully: ${webhookUrl}`);
+            const webhookUrl = `${RENDER_BACKEND_URL}/webhook/telegram`;
+            console.log(`📡 Telegram သို့ Webhook Link ပို့နေသည်: ${webhookUrl}`);
+            
+            const tgRes = await axios.get(`https://api.telegram.org/bot${tgToken}/setWebhook?url=${webhookUrl}`);
+            console.log('🟢 Telegram Response:', tgRes.data);
         } catch (error) {
-            console.error('❌ Telegram Webhook ချိတ်ဆက်မှု မအောင်မြင်ပါ:', error.message);
+            console.error('❌ Telegram Webhook ချိတ်ဆက်မှု မအောင်မြင်ပါ:', error.response ? error.response.data : error.message);
         }
     }
     res.sendStatus(200);
 });
 
-// ၃။ Dashboard ကနေ ၃ စက္ကန့်တစ်ကြိမ် စာအသစ်ဝင်မဝင် လှမ်းဆွဲမည့်နေရာ
 app.get('/api/messages', (req, res) => {
     res.json({ users: userList, logs: messageLogs });
 });
 
-// ၄။ Dashboard ပေါ်ကနေ ယူဆာဆီ စာပြန်ရိုက်ပို့လျှင် အလုပ်လုပ်မည့်နေရာ
 app.post('/api/send-message', async (req, res) => {
     const { text, userId, platform } = req.body;
-    
-    // ပို့လိုက်တဲ့စာကို ဒိုင်ခွက်ထဲမှာ မှတ်သားထားရန်
     messageLogs.push({ userId, text, sender: 'admin', timestamp: new Date() });
 
     if (platform === 'Telegram' && configStorage.tgToken) {
@@ -67,20 +66,17 @@ app.post('/api/send-message', async (req, res) => {
     res.sendStatus(200);
 });
 
-// ၅။ TELEGRAM WEBHOOK (Telegram မှ စာဝင်လာလျှင် ဖမ်းမည့်နေရာ)
 app.post('/webhook/telegram', (req, res) => {
+    console.log('📥 Telegram Webhook သို့ စာဝင်လာသည်:', JSON.stringify(req.body));
+    
     const message = req.body.message;
     if (message) {
         const chatId = message.chat.id;
-        const text = message.text;
+        const text = message.text || '';
         const firstName = message.chat.first_name || 'Unknown User';
         
-        console.log(`📩 Telegram Message ရရှိသည်: [ID: ${chatId}] - ${text}`);
-        
-        // စာဝင်လာလျှင် သိမ်းဆည်းခြင်း
         messageLogs.push({ userId: chatId, text, sender: 'user', timestamp: new Date() });
 
-        // User စာရင်းထဲ မရှိသေးရင် အသစ်ထည့်ခြင်း၊ ရှိပြီးသားဆိုရင် နောက်ဆုံးစာကို Update လုပ်ခြင်း
         const userExist = userList.find(u => u.id == chatId);
         if (!userExist) {
             userList.push({ id: chatId, name: firstName, platform: 'Telegram', lastMsg: text, gender: 'Not Specified', time: 'Just Now' });
@@ -92,7 +88,6 @@ app.post('/webhook/telegram', (req, res) => {
     res.sendStatus(200);
 });
 
-// ၆။ MESSENGER WEBHOOK (Facebook က လာစစ်လျှင် အတည်ပြုပေးမည့်နေရာ)
 app.get('/webhook/messenger', (req, res) => {
     const mode = req.query['hub.mode'];
     const token = req.query['hub.verify_token'];
@@ -108,7 +103,6 @@ app.get('/webhook/messenger', (req, res) => {
     }
 });
 
-// ၇။ MESSENGER WEBHOOK (Messenger မှ စာဝင်လာလျှင် ဖမ်းမည့်နေရာ)
 app.post('/webhook/messenger', (req, res) => {
     const body = req.body;
     if (body.object === 'page') {
@@ -117,7 +111,6 @@ app.post('/webhook/messenger', (req, res) => {
             if (webhookEvent && webhookEvent.message) {
                 const senderId = webhookEvent.sender.id;
                 const text = webhookEvent.message.text;
-                console.log(`📩 Messenger Message ရရှိသည်: [ID: ${senderId}] - ${text}`);
                 
                 messageLogs.push({ userId: senderId, text, sender: 'user', timestamp: new Date() });
 
@@ -136,7 +129,6 @@ app.post('/webhook/messenger', (req, res) => {
     }
 });
 
-// Server ကို Port ဖွင့်၍ မောင်းနှင်ခြင်း
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`🎯 Server is running on port ${PORT}`);
