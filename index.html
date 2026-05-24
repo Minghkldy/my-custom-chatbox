@@ -4,7 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatrace Style Inbox - Pro</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; overflow: hidden; }
+        
+        /* 1. ဘယ်ဘက်အစွန်းဆုံး ပင်မ Menu Bar */
+        .main-sidebar { width: 70px; background-color: #080d16; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; border-right: 1px solid #1f2937; }
+        .menu-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 20px; color: #9ca3af; transition: 0.2s; }
+        .menu-icon:hover, .menu-icon.active { background-color: #1e293b; color: #3b82f6; }
+
+        /* Main App Content Wrapper */
+        .app-container { flex: 1; display: flex; position: relative; }
+        .page { display: none; width: 100%; height: 100%; }
+        .page.active { display: flex; }
+
+        /* 2. INBOX PAGE - User List */
+        .user-sidebar { width: 320px; background-color: #111827; border-right: 1px solid #1f2937; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid #1f2937; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .user-list { flex: 1; overflow-y: auto; }
+        .user-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1f2937; cursor: pointer; transition: 0.2s; gap: 12px; }
+        .user-item:hover, .user-item.active { background-color: #1f2937; }
+        .avatar { width: 40px; height: 40px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 16px; text-transform: uppercase; }
+        .platform-badge { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+        .badge-tg { background-color: #0088cc; }
+        .badge-msg { background-color: #006aff; }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name { font-weight: bold; font-size: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+        .msg-time { font-size: 11px; color: #6b7280; font-weight: normal; }
+        .last-msg { font-size: 12px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 3. INBOX PAGE - Middle Chat Area */
+        .chat-area { flex: 1; display: flex; flex-direction: column; background-color: #0f172a; }
+        .chat-header { height: 60px; background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; align-items: center; padding: 0 20px; font-weight: bold; justify-content: space-between; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message-wrapper { display: flex; flex-direction: column; width: 100%; }
+        .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; word-break: break-word; }
+        .message.incoming { background-color: #1e293b; color: #f3f4f6; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .message.outgoing { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-input-container { padding: 15px 20px; background-color: #111827; border-top: 1px solid #1f2937; display: flex; gap: 12px; align-items: center; }
+        .chat-input-container input { flex: 1; background-color: #1f2937; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; }
+        .chat-input-container button { background-color: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+        /* 4. INBOX PAGE - Right Sidebar */
+        .details-sidebar { width: 300px; background-color: #111827; border-left: 1px solid #1f2937; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow-y: auto; }
+        .details-avatar { width: 80px; height: 80px; background-color: #374151; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; text-transform: uppercase; }
+        .details-name-box { display: flex; align-items: center; gap: 8px; }
+        .details-name { font-size: 18px; font-weight: bold; }
+        .btn-edit-name { background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 14px; }
+        .info-card { width: 100%; background-color: #1f2937; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding-bottom: 8px; }
+        .info-row:last-child { border: none; padding: 0; }
+        .info-label { color: #9ca3af; }
+        
+        /* SETTINGS & BROADCAST VIEWS */
+        .panel-view { padding: 40px; display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .form-group label { font-size: 14px; font-weight: bold; color: #9ca3af; }
+        .form-group input, .form-group select, .form-group textarea { background-color: #111827; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; width: 100%; }
+        .form-group textarea { height: 120px; resize: none; }
+        .btn-primary { background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+        .btn-danger { background-color: #dc2626; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+
+        /* NOTIFICATION TOAST */
+        .noti-toast { position: fixed; top: 20px; right: 20px; background-color: #1e293b; border-left: 4px solid #3b82f6; padding: 15px 25px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: none; gap: 10px; align-items: center; z-index: 9999; animation: slideIn 0.3s ease; }
+        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* 🆕 IMAGE LIGHTBOX MODAL STYLES */
+        .image-zoom-modal { position: fixed; z-index: 99999; padding-top: 40px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.9); }
+        .zoom-modal-content { margin: auto; display: block; max-width: 85%; max-height: 85vh; object-fit: contain; border-radius: 6px; animation: zoomInEffect 0.2s ease-in-out; }
+        @keyframes zoomInEffect { from { transform: scale(0.75); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .zoom-close-btn { position: absolute; top: 15px; right: 35px; color: #f3f4f6; font-size: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; }
+        .zoom-close-btn:hover { color: #9ca3af; }
+        .chat-messages img { cursor: pointer; transition: opacity 0.2s; }
+        .chat-messages img:hover { opacity: 0.85; }
+    </style>
 </head>
 <body>
 
@@ -18,72 +91,68 @@
         </div>
     </div>
 
-    <div class="app-layout">
+    <div class="main-sidebar">
+        <div class="menu-icon active" id="ico-inbox" onclick="showTab('inbox-tab', 'ico-inbox')" title="Inbox">📥</div>
+        <div class="menu-icon" id="ico-bc" onclick="showTab('bc-tab', 'ico-bc')" title="Broadcast">📢</div>
+        <div class="menu-icon" id="ico-settings" onclick="showTab('settings-tab', 'ico-settings')" title="Channels Connection Settings">⚙️</div>
+    </div>
 
-        <div class="main-sidebar">
-            <div class="menu-icon active" id="ico-inbox" onclick="showTab('inbox-tab', 'ico-inbox')" title="Inbox">📥</div>
-            <div class="menu-icon" id="ico-bc" onclick="showTab('bc-tab', 'ico-bc')" title="Broadcast">📢</div>
-            <div class="menu-icon" id="ico-settings" onclick="showTab('settings-tab', 'ico-settings')" title="Channels Connection Settings">⚙️</div>
+    <div class="app-container">
+        
+        <div id="inbox-tab" class="page active">
+            <div class="user-sidebar">
+                <div class="sidebar-header">
+                    <span>Inbox Conversations</span>
+                    <button onclick="triggerDemoNotification()" style="font-size: 11px; background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Noti Test 🔔</button>
+                </div>
+                <div class="user-list" id="users-container">
+                    <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="chat-header">
+                    <span id="active-chat-title">💬 Please select a conversation</span>
+                </div>
+                <div class="chat-messages" id="chat-stream">
+                    <p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျများကို ဖတ်ရှုရန် လူတစ်ဦးအား ရွေးချယ်ပေးပါ</p>
+                </div>
+                <div class="chat-input-container">
+                    <label for="chat-image-file" style="cursor: pointer; font-size: 20px; color: #9ca3af; user-select: none; transition: 0.2s;" title="Upload Photo">📎</label>
+                    <input type="file" id="chat-image-file" accept="image/*" style="display: none;" onchange="uploadAndSendChatImage(this)">
+                    
+                    <input type="text" id="chat-field" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') pushMessage()">
+                    <button onclick="pushMessage()">Send</button>
+                </div>
+            </div>
+
+            <div class="details-sidebar">
+                <div class="details-avatar" id="det-av">?</div>
+                <div class="details-name-box">
+                    <div class="details-name" id="det-name">-</div>
+                    <button class="btn-edit-name" onclick="editCurrentUserName()" title="Edit Name">✏️ ပြင်ရန်</button>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-row"><span class="info-label">Contact ID</span><span id="det-id">-</span></div>
+                    <div class="info-row"><span class="info-label">Platform</span><span id="det-plat">-</span></div>
+                    <div class="info-row"><span class="info-label">Gender</span><span id="det-gen">-</span></div>
+                </div>
+
+                <div style="width: 100%; text-align: left;">
+                    <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #9ca3af;">Tags</div>
+                    <div style="display: inline-block; background-color: #374151; color: #3b82f6; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">Customer</div>
+                </div>
+            </div>
         </div>
 
-        <div class="app-container">
-            
-            <div id="inbox-tab" class="page active">
-                
-                <div class="user-sidebar">
-                    <div class="sidebar-header">
-                        <span>Inbox Conversations</span>
-                        <button onclick="triggerDemoNotification()" style="font-size: 11px; background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Noti Test 🔔</button>
-                    </div>
-                    <div class="user-list" id="users-container">
-                        <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>
-                    </div>
-                </div>
+        <div id="broadcast-placeholder" style="width: 100%; height: 100%;"></div>
 
-                <div class="chat-area">
-                    <div class="chat-header">
-                        <span id="active-chat-title">💬 Please select a conversation</span>
-                    </div>
-                    <div class="chat-messages" id="chat-stream">
-                        <p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျများကို ဖတ်ရှုရန် လူတစ်ဦးအား ရွေးချယ်ပေးပါ</p>
-                    </div>
-                    <div class="chat-input-container">
-                        <label for="chat-image-file" style="cursor: pointer; font-size: 20px; color: #9ca3af; user-select: none; transition: 0.2s;" title="Upload Photo">📎</label>
-                        <input type="file" id="chat-image-file" accept="image/*" style="display: none;" onchange="uploadAndSendChatImage(this)">
-                        
-                        <input type="text" id="chat-field" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') pushMessage()">
-                        <button onclick="pushMessage()">Send</button>
-                    </div>
-                </div>
+        <div id="settings-placeholder" style="width: 100%; height: 100%;"></div>
 
-                <div class="details-sidebar">
-                    <div class="details-avatar" id="det-av">?</div>
-                    <div class="details-name-box">
-                        <div class="details-name" id="det-name">-</div>
-                        <button class="btn-edit-name" onclick="editCurrentUserName()" title="Edit Name">✏️ ပြင်ရန်</button>
-                    </div>
-                    
-                    <div class="info-card">
-                        <div class="info-row"><span class="info-label">Contact ID</span><span id="det-id">-</span></div>
-                        <div class="info-row"><span class="info-label">Platform</span><span id="det-plat">-</span></div>
-                        <div class="info-row"><span class="info-label">Gender</span><span id="det-gen">-</span></div>
-                    </div>
+    </div>
 
-                    <div style="width: 100%; text-align: left;">
-                        <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #9ca3af;">Tags</div>
-                        <div style="display: inline-block; background-color: #374151; color: #3b82f6; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">Customer</div>
-                    </div>
-                </div>
-
-            </div> <div id="bc-tab" class="page">
-                <div id="broadcast-placeholder" style="width: 100%; height: 100%;"></div>
-            </div>
-
-            <div id="settings-tab" class="page">
-                <div id="settings-placeholder" style="width: 100%; height: 100%;"></div>
-            </div>
-
-        </div> </div> <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
+    <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
         <span class="zoom-close-btn" onclick="closeImageZoomModal()">&times;</span>
         <img class="zoom-modal-content" id="zoom-target-src">
     </div>
@@ -101,19 +170,15 @@
         function showTab(tabId, iconId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.menu-icon').forEach(i => i.classList.remove('active'));
-            
-            const targetTab = document.getElementById(tabId);
-            if(targetTab) targetTab.classList.add('active');
-            
-            const targetIcon = document.getElementById(iconId);
-            if(targetIcon) targetIcon.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById(iconId).classList.add('active');
         }
 
         // 🆕 API Keys များကို တစ်ခုချင်းစီ ခွဲပြီး သိမ်းဆည်းပေးမည့် လုပ်ဆောင်ချက်အသစ်
         async function saveSingleSetting(type) {
-            let tgToken = document.getElementById('storage-tg-token') ? document.getElementById('storage-tg-token').value.trim() : '';
-            let fbToken = document.getElementById('storage-fb-token') ? document.getElementById('storage-fb-token').value.trim() : '';
-            let fbVerify = document.getElementById('storage-fb-verify') ? document.getElementById('storage-fb-verify').value.trim() : '';
+            let tgToken = document.getElementById('storage-tg-token').value.trim();
+            let fbToken = document.getElementById('storage-fb-token').value.trim();
+            let fbVerify = document.getElementById('storage-fb-verify').value.trim();
 
             if (type === 'tg') {
                 localStorage.setItem('TG_TOKEN', tgToken);
@@ -143,9 +208,9 @@
 
         // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း (အဟောင်း)
         async function saveSettingsToLocal() {
-            let tgToken = document.getElementById('storage-tg-token') ? document.getElementById('storage-tg-token').value.trim() : '';
-            let fbToken = document.getElementById('storage-fb-token') ? document.getElementById('storage-fb-token').value.trim() : '';
-            let fbVerify = document.getElementById('storage-fb-verify') ? document.getElementById('storage-fb-verify').value.trim() : '';
+            let tgToken = document.getElementById('storage-tg-token').value.trim();
+            let fbToken = document.getElementById('storage-fb-token').value.trim();
+            let fbVerify = document.getElementById('storage-fb-verify').value.trim();
 
             localStorage.setItem('TG_TOKEN', tgToken);
             localStorage.setItem('FB_TOKEN', fbToken);
@@ -166,7 +231,7 @@
             }
         }
 
-        // Сာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်နှင့် သီးသန့်ဖိုင်များကို ဆွဲခေါ်ရန်
+        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်နှင့် သီးသန့်ဖိုင်များကို ဆွဲခေါ်ရန်
         window.onload = function() {
             // 🔄 Broadcast HTML ဖိုင်အား Dynamic Fetch လုပ်ပြီး လှမ်းထည့်ခြင်း
             fetch('broadcast.html')
@@ -182,11 +247,9 @@
                 .then(htmlData => {
                     document.getElementById('settings-placeholder').innerHTML = htmlData;
                     // ဖိုင်ဆွဲပြီးမှ input values များကို ပြန်ထည့်ပေးခြင်း
-                    setTimeout(() => {
-                        if(localStorage.getItem('TG_TOKEN') && document.getElementById('storage-tg-token')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
-                        if(localStorage.getItem('FB_TOKEN') && document.getElementById('storage-fb-token')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
-                        if(localStorage.getItem('FB_VERIFY') && document.getElementById('storage-fb-verify')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
-                    }, 200);
+                    if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
+                    if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
+                    if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
                 })
                 .catch(err => console.error("Settings ဖိုင်ဆွဲယူရာတွင် အမှားရှိသည် - ", err));
 
@@ -247,7 +310,6 @@
         // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း
         function renderUserList(users) {
             const container = document.getElementById('users-container');
-            if(!container) return;
             if(users.length === 0) {
                 container.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>`;
                 return;
@@ -320,7 +382,6 @@
             if(!currentActiveUserId) return;
             
             const stream = document.getElementById('chat-stream');
-            if(!stream) return;
             let activeLogs = logs.filter(log => log.userId == currentActiveUserId);
             
             if(activeLogs.length === 0) {
@@ -337,7 +398,7 @@
                 
                 // 🆕 ပုံကြီးချဲ့စနစ်နှင့် ချိတ်ဆက်နိုင်ရန် window.open နေရာတွင် သတ်မှတ်ချက်ကို ဖယ်ထုတ်ပြီး IMG များကို တိုက်ရိုက် render လုပ်ထားပါသည်
                 let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0 haste;"/>`
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
                     : log.text;
 
                 html += `<div class="message-wrapper"><div class="message ${sideClass}">${renderContent}</div></div>`;
@@ -456,8 +517,8 @@
 
         // 📢 စာသားရော ဓာတ်ပုံလင့်ခ်ပါ ပူးတွဲပို့နိုင်မည့် Broadcast စနစ်သစ် လုပ်ဆောင်ချက်
         async function executeBroadcast() {
-            const text = document.getElementById('bc-text') ? document.getElementById('bc-text').value.trim() : '';
-            const imageUrl = document.getElementById('bc-image-url') ? document.getElementById('bc-image-url').value.trim() : '';
+            const text = document.getElementById('bc-text').value.trim();
+            const imageUrl = document.getElementById('bc-image-url').value.trim();
 
             if (!text && !imageUrl) {
                 alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ।");
@@ -473,8 +534,8 @@
                 
                 if (response.ok) {
                     alert("📢 Broadcast Message ကို လူတိုင်းဆီ အောင်မြင်စွာ ဖြန့်ဝေပြီးပါပြီဗျာ!");
-                    if(document.getElementById('bc-text')) document.getElementById('bc-text').value = "";
-                    if(document.getElementById('bc-image-url')) document.getElementById('bc-image-url').value = "";
+                    document.getElementById('bc-text').value = "";
+                    document.getElementById('bc-image-url').value = "";
                 } else {
                     alert("Broadcast ပို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
                 }
