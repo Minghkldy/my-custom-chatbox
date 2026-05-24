@@ -146,9 +146,55 @@
             </div>
         </div>
 
-        <div id="broadcast-placeholder" style="width: 100%; height: 100%;"></div>
+        <div id="bc-tab" class="page">
+            <div class="panel-view">
+                <h2>📢 Send Broadcast Message</h2>
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <select id="bc-platform">
+                        <option>Telegram & Messenger Users All</option>
+                        <option>Telegram Users Only</option>
+                        <option>Messenger Users Only</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Photo URL (Optional)</label>
+                    <input type="text" id="bc-image-url" placeholder="ဥပမာ- https://example.com/image.jpg (ပုံလင့်ခ်ထည့်ရန်)">
+                </div>
+                <div class="form-group">
+                    <label>Message Content</label>
+                    <textarea id="bc-text" placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့်စာကို ဒီမှာရေးပါ..."></textarea>
+                </div>
+                <button class="btn-danger" onclick="executeBroadcast()">Send Broadcast Now 🚀</button>
+            </div>
+        </div>
 
-        <div id="settings-placeholder" style="width: 100%; height: 100%;"></div>
+        <div id="settings-tab" class="page">
+            <div class="panel-view">
+                <h2>⚙️ Channels Connection Settings</h2>
+                <p style="color: #9ca3af; font-size: 14px; margin-bottom: 10px;">Telegram Token များနှင့် Messenger API များကို Website Dashboard ပေါ်မှ တိုက်ရိုက် ဆက်သွယ်ချိတ်ဆက်ရန်နေရာ ဖြစ်သည်။</p>
+                
+                <hr style="border: 0; border-top: 1px solid #1f2937; margin-bottom: 15px;">
+
+                <h3 style="color: #0088cc; margin-bottom: 10px;">🤖 Telegram Bot Setup</h3>
+                <div class="form-group">
+                    <label>Telegram Bot Token API</label>
+                    <input type="text" id="storage-tg-token" placeholder="ဥပမာ- 746291039:AAFlk93_Djs93...">
+                </div>
+                <button class="btn-primary" onclick="saveSingleSetting('tg')" style="background-color: #0088cc; margin-bottom: 25px;">Save Telegram Token Only 🤖</button>
+
+                <h3 style="color: #006aff; margin-top: 20px; margin-bottom: 10px;">💬 Facebook Messenger Setup</h3>
+                <div class="form-group">
+                    <label>Messenger Page Access Token</label>
+                    <input type="text" id="storage-fb-token" placeholder="EAAGm... ဟုစမည့် Page Access Token အရှည်ကြီး ထည့်ပါ">
+                </div>
+                <div class="form-group">
+                    <label>Webhook Verify Token (Render နှင့် ချိတ်စဉ်က သုံးခဲ့သော လျှို့ဝှက်စာလုံး)</label>
+                    <input type="text" id="storage-fb-verify" placeholder="ဥပမာ- my_super_secret_token_123">
+                </div>
+                <button class="btn-primary" onclick="saveSingleSetting('fb')" style="background-color: #006aff;">Save Facebook Settings Only 💬</button>
+            </div>
+        </div>
 
     </div>
 
@@ -182,6 +228,7 @@
 
             if (type === 'tg') {
                 localStorage.setItem('TG_TOKEN', tgToken);
+                // Facebook keys များကို အလွတ်မဖြစ်သွားစေရန် server သို့ လက်ရှိတန်ဖိုးများအတိုင်း ပြန်တွဲပို့ပေးပါမည်
             } else if (type === 'fb') {
                 localStorage.setItem('FB_TOKEN', fbToken);
                 localStorage.setItem('FB_VERIFY', fbVerify);
@@ -206,7 +253,7 @@
             }
         }
 
-        // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း (အဟောင်း)
+        // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း (အဟောင်း - ခလုတ်ဖျက်လိုက်သော်လည်း logic သဘောအရ ထားရှိပါသည်)
         async function saveSettingsToLocal() {
             let tgToken = document.getElementById('storage-tg-token').value.trim();
             let fbToken = document.getElementById('storage-fb-token').value.trim();
@@ -231,28 +278,12 @@
             }
         }
 
-        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်နှင့် သီးသန့်ဖိုင်များကို ဆွဲခေါ်ရန်
+        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
         window.onload = function() {
-            // 🔄 Broadcast HTML ဖိုင်အား Dynamic Fetch လုပ်ပြီး လှမ်းထည့်ခြင်း
-            fetch('broadcast.html')
-                .then(response => response.text())
-                .then(htmlData => {
-                    document.getElementById('broadcast-placeholder').innerHTML = htmlData;
-                })
-                .catch(err => console.error("Broadcast ဖိုင်ဆွဲယူရာတွင် အမှားရှိသည် - ", err));
-
-            // 🔄 Settings HTML ဖိုင်အား Dynamic Fetch လုပ်ပြီး လှမ်းထည့်ခြင်း
-            fetch('settings.html')
-                .then(response => response.text())
-                .then(htmlData => {
-                    document.getElementById('settings-placeholder').innerHTML = htmlData;
-                    // ဖိုင်ဆွဲပြီးမှ input values များကို ပြန်ထည့်ပေးခြင်း
-                    if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
-                    if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
-                    if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
-                })
-                .catch(err => console.error("Settings ဖိုင်ဆွဲယူရာတွင် အမှားရှိသည် - ", err));
-
+            if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
+            if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
+            if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
+            
             // Server က ဒေတာတွေကို ချက်ချင်း စတင်ဆွဲယူခိုင်းခြင်း
             fetchLiveUpdates();
 
@@ -521,7 +552,7 @@
             const imageUrl = document.getElementById('bc-image-url').value.trim();
 
             if (!text && !imageUrl) {
-                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ।");
+                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ။");
                 return;
             }
 
