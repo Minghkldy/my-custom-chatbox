@@ -353,7 +353,7 @@
             setTimeout(fetchLiveUpdates, 3000);
         }
 
-        // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း
+        // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း (🕒 Real-time အချိန်စနစ် ညှပ်ထည့်ထားသည်)
         function renderUserList(users) {
             const container = document.getElementById('users-container');
             if(users.length === 0) {
@@ -373,14 +373,20 @@
                     ? `<span style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; font-weight: bold; margin-left: 8px;">${user.unread}</span>`
                     : '';
 
+                // 🕒 အကယ်၍ Server ဘက်က အချိန်အတိအကျ မပါလာပါက Browser ရဲ့ လက်ရှိအချိန်ကို Real-time ထည့်ပေးမည့်စနစ်
+                let displayTime = user.time || '';
+                if (!displayTime && ((user.unread && user.unread > 0) || user.lastMsg)) {
+                    const now = new Date();
+                    displayTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+
                 html += `
                     <div class="user-item ${activeClass}" id="user-node-${user.id}" onclick="selectUser('${user.name.replace(/'/g, "\\'")}', '${user.platform}', '${user.id}', '${user.gender}')">
                         <div class="avatar">${initial}<div class="platform-badge ${badgeClass}">${platformLabel}</div></div>
                         <div class="user-info">
                             <div class="user-name">
                                 <span>${displayName} ${unreadBadgeHtml}</span> 
-                                <span class="msg-time">${user.time || ''}</span>
-                            </div>
+                                <span class="msg-time">${displayTime}</span>  </div>
                             <div class="last-msg">${user.lastMsg || ''}</div>
                         </div>
                     </div>
@@ -421,53 +427,6 @@
                     renderUserList(data.users);
                     renderChatStream(data.logs);
                 });
-        }
-        // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ အစီအစဉ်တကျ ပြသခြင်း (🕒 အချိန်စနစ် ထည့်သွင်းထားသည်)
-        function renderChatStream(logs) {
-            if(!currentActiveUserId) return;
-            
-            const stream = document.getElementById('chat-stream');
-            let activeLogs = logs.filter(log => log.userId == currentActiveUserId);
-            
-            if(activeLogs.length === 0) {
-                stream.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျမရှိသေးပါ စာစတင်ရိုက်ပို့နိုင်ပါသည်</p>`;
-                return;
-            }
-
-            let html = '';
-            activeLogs.forEach(log => {
-                let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
-                const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
-                
-                // 🕒 ၁။ စာဝင်/စာထွက်ချိန်ကို HH:MM AM/PM ပုံစံဖြင့် တွက်ချက်ခြင်း (စနစ်ထဲတွင် အချိန်မပါလာပါက လက်ရှိအချိန်ကို ပြပေးမည်)
-                let timeString = "";
-                if (log.time) {
-                    timeString = log.time; // Server က အချိန်ပေးရင် သုံးမည်
-                } else {
-                    const now = new Date();
-                    timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }
-                
-                let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
-                    : log.text;
-
-                // ညှပ်ထည့်ချက် - စာသား သို့မဟုတ် ပုံ၏ အောက်ခြေတွင် အချိန်ပြသပေးမည့် msg-time စာတန်းကို ထည့်သွင်းထားပါသည်
-                html += `
-                    <div class="message-wrapper">
-                        <div class="message ${sideClass}" style="display: flex; flex-direction: column; gap: 4px;">
-                            <div class="message-content">${renderContent}</div>
-                            <span class="msg-time" style="font-size: 10px; color: #a0aec0; align-self: flex-end; margin-top: 2px; font-weight: normal;">${timeString}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            let isScrollAtBottom = stream.scrollHeight - stream.clientHeight <= stream.scrollTop + 100;
-            stream.innerHTML = html;
-            if(isScrollAtBottom || totalMessagesCount === 0) {
-                stream.scrollTop = stream.scrollHeight;
-            }
         }
 
         // 📷 ကွန်ပျူတာ/ဖုန်းထဲမှ ပုံရွေးပြီး တိုက်ရိုက် Upload လုပ်၍ ပို့မည့် စနစ်သစ်
