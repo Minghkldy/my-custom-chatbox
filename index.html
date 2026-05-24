@@ -353,7 +353,7 @@
             setTimeout(fetchLiveUpdates, 3000);
         }
 
-        // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း (🕒 Real-time အချိန်စနစ် ညှပ်ထည့်ထားသည်)
+       // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း
         function renderUserList(users) {
             const container = document.getElementById('users-container');
             if(users.length === 0) {
@@ -373,20 +373,14 @@
                     ? `<span style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; font-weight: bold; margin-left: 8px;">${user.unread}</span>`
                     : '';
 
-                // 🕒 အကယ်၍ Server ဘက်က အချိန်အတိအကျ မပါလာပါက Browser ရဲ့ လက်ရှိအချိန်ကို Real-time ထည့်ပေးမည့်စနစ်
-                let displayTime = user.time || '';
-                if (!displayTime && ((user.unread && user.unread > 0) || user.lastMsg)) {
-                    const now = new Date();
-                    displayTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }
-
                 html += `
                     <div class="user-item ${activeClass}" id="user-node-${user.id}" onclick="selectUser('${user.name.replace(/'/g, "\\'")}', '${user.platform}', '${user.id}', '${user.gender}')">
                         <div class="avatar">${initial}<div class="platform-badge ${badgeClass}">${platformLabel}</div></div>
                         <div class="user-info">
                             <div class="user-name">
                                 <span>${displayName} ${unreadBadgeHtml}</span> 
-                                <span class="msg-time">${displayTime}</span>  </div>
+                                <span class="msg-time">${user.time || ''}</span>
+                            </div>
                             <div class="last-msg">${user.lastMsg || ''}</div>
                         </div>
                     </div>
@@ -427,6 +421,37 @@
                     renderUserList(data.users);
                     renderChatStream(data.logs);
                 });
+        }
+
+        // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ အစီအစဉ်တကျ ပြသခြင်း
+        function renderChatStream(logs) {
+            if(!currentActiveUserId) return;
+            
+            const stream = document.getElementById('chat-stream');
+            let activeLogs = logs.filter(log => log.userId == currentActiveUserId);
+            
+            if(activeLogs.length === 0) {
+                stream.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျမရှိသေးပါ စာစတင်ရိုက်ပို့နိုင်ပါသည်</p>`;
+                return;
+            }
+
+            let html = '';
+            activeLogs.forEach(log => {
+                let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
+                const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
+                
+                let renderContent = isImage 
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0行業;"/>`
+                    : log.text;
+
+                html += `<div class="message-wrapper"><div class="message ${sideClass}">${renderContent}</div></div>`;
+            });
+            
+            let isScrollAtBottom = stream.scrollHeight - stream.clientHeight <= stream.scrollTop + 100;
+            stream.innerHTML = html;
+            if(isScrollAtBottom || totalMessagesCount === 0) {
+                stream.scrollTop = stream.scrollHeight;
+            }
         }
 
         // 📷 ကွန်ပျူတာ/ဖုန်းထဲမှ ပုံရွေးပြီး တိုက်ရိုက် Upload လုပ်၍ ပို့မည့် စနစ်သစ်
