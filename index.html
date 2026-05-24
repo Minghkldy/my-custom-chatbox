@@ -570,24 +570,34 @@
             }
         }
 
-        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန်
-        function triggerDemoNotification() {
-            const sound = document.getElementById('noti-sound');
-            if (sound) {
-                sound.volume = 1.0;
-                sound.currentTime = 0;
-                sound.play().catch(error => {
-                    console.log("Browser blocked autoplay, waiting for click...");
-                    document.body.addEventListener('click', () => { sound.play(); }, { once: true });
-                });
-            }
+        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် (စနစ်တကျ ပြင်ဆင်ပြီး)
+function triggerDemoNotification() {
+    const sound = document.getElementById('noti-sound'); // HTML ID နှင့် တိုက်ရိုက်ချိတ်ဆက်ခြင်း
+    const notiBox = document.getElementById('notification-box');
+    
+    if (sound) {
+        sound.volume = 1.0;  // 👈 အသံပမာဏကို ၁၀၀% အပြည့်ဖွင့်ခိုင်းခြင်း
+        sound.currentTime = 0; // အသံကို အစကနေ ပြန်စဖွင့်ခြင်း
+        
+        // Browser က အသံပိတ်ထားခြင်းကို ကျော်လွှားရန် Play စနစ်
+        sound.play().catch(error => {
+            console.log("Browser က အသံကို ပိတ်ထားသဖြင့် ကလစ်နှိပ်ရန် စောင့်ဆိုင်းနေပါသည်...");
+            document.body.addEventListener('click', () => { sound.play(); }, { once: true });
+        });
+    }
 
-            let notiBox = document.getElementById('notification-box');
-            document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
-            document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
-            notiBox.style.display = "flex";
-            setTimeout(() => { notiBox.style.display = "none"; }, 4000);
-        }
+    // Noti Pop-up Box အပေါ်တွင် စာသားများ ပြသခြင်း
+    if (notiBox) {
+        document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
+        document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
+        notiBox.style.display = "flex";
+        
+        // ၄ စက္ကန့်ပြည့်လျှင် Noti Box ပြန်ပျောက်သွားစေရန်
+        setTimeout(() => { 
+            notiBox.style.display = "none"; 
+        }, 4000);
+    }
+}
     </script>
 </body>
 </html>
