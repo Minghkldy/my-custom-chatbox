@@ -24,21 +24,21 @@
         .user-list { flex: 1; overflow-y: auto; }
         .user-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1f2937; cursor: pointer; transition: 0.2s; gap: 12px; }
         .user-item:hover, .user-item.active { background-color: #1f2937; }
-        .avatar { width: 40px; height: 40px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 16px; }
+        .avatar { width: 40px; height: 40px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 16px; text-transform: uppercase; }
         .platform-badge { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; color: white; }
         .badge-tg { background-color: #0088cc; }
         .badge-msg { background-color: #006aff; }
-        .user-info { flex: 1; }
+        .user-info { flex: 1; min-width: 0; }
         .user-name { font-weight: bold; font-size: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; }
         .msg-time { font-size: 11px; color: #6b7280; font-weight: normal; }
-        .last-msg { font-size: 12px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 180px; }
+        .last-msg { font-size: 12px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         /* 3. INBOX PAGE - Middle Chat Area */
         .chat-area { flex: 1; display: flex; flex-direction: column; background-color: #0f172a; }
         .chat-header { height: 60px; background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; align-items: center; padding: 0 20px; font-weight: bold; justify-content: space-between; }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message-wrapper { display: flex; flex-direction: column; width: 100%; }
-        .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; }
+        .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; word-break: break-word; }
         .message.incoming { background-color: #1e293b; color: #f3f4f6; align-self: flex-start; border-bottom-left-radius: 2px; }
         .message.outgoing { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .chat-input-container { padding: 15px 20px; background-color: #111827; border-top: 1px solid #1f2937; display: flex; gap: 12px; align-items: center; }
@@ -47,7 +47,7 @@
 
         /* 4. INBOX PAGE - Right Sidebar */
         .details-sidebar { width: 300px; background-color: #111827; border-left: 1px solid #1f2937; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow-y: auto; }
-        .details-avatar { width: 80px; height: 80px; background-color: #374151; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; }
+        .details-avatar { width: 80px; height: 80px; background-color: #374151; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; text-transform: uppercase; }
         .details-name-box { display: flex; align-items: center; gap: 8px; }
         .details-name { font-size: 18px; font-weight: bold; }
         .btn-edit-name { background: none; border: none; color: #3b82f6; cursor: pointer; font-size: 14px; }
@@ -97,48 +97,34 @@
                     <button onclick="triggerDemoNotification()" style="font-size: 11px; background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Noti Test 🔔</button>
                 </div>
                 <div class="user-list" id="users-container">
-                    <div class="user-item active" id="user-node-270972449" onclick="selectUser('Jay', 'Telegram', '270972449', 'Male')">
-                        <div class="avatar" id="avatar-270972449">J<div class="platform-badge badge-tg">TG</div></div>
-                        <div class="user-info">
-                            <div class="user-name"><span id="list-name-270972449">Jay</span> <span class="msg-time">10 hours</span></div>
-                            <div class="last-msg">ငွေသွင်းချင်လို့ပါဗျာ ဘယ်လိုလုပ်ရမလဲရှင့်...</div>
-                        </div>
-                    </div>
-                    <div class="user-item" id="user-node-543210987" onclick="selectUser('UW00213', 'Messenger', '543210987', 'Female')">
-                        <div class="avatar" id="avatar-543210987">U<div class="platform-badge badge-msg">FB</div></div>
-                        <div class="user-info">
-                            <div class="user-name"><span id="list-name-543210987">UW00213</span> <span class="msg-time">9 hours</span></div>
-                            <div class="last-msg">ငွေထုတ် password ကလိုသေးတာလား...</div>
-                        </div>
-                    </div>
+                    <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>
                 </div>
             </div>
 
             <div class="chat-area">
                 <div class="chat-header">
-                    <span id="active-chat-title">💬 Chatting with Jay</span>
+                    <span id="active-chat-title">💬 Please select a conversation</span>
                 </div>
                 <div class="chat-messages" id="chat-stream">
-                    <div class="message-wrapper"><div class="message incoming">ငွေသွင်းချင်လို့ပါဗျာ ဘယ်လိုလုပ်ရမလဲရှင့်...</div></div>
-                    <div class="message-wrapper"><div class="message outgoing">မင်္ဂလာပါခင်ဗျာ။ ကူညီပေးပါရစေ။</div></div>
+                    <p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျများကို ဖတ်ရှုရန် လူတစ်ဦးအား ရွေးချယ်ပေးပါ</p>
                 </div>
                 <div class="chat-input-container">
-                    <input type="text" id="chat-field" placeholder="Type a message...">
+                    <input type="text" id="chat-field" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') pushMessage()">
                     <button onclick="pushMessage()">Send</button>
                 </div>
             </div>
 
             <div class="details-sidebar">
-                <div class="details-avatar" id="det-av">J</div>
+                <div class="details-avatar" id="det-av">?</div>
                 <div class="details-name-box">
-                    <div class="details-name" id="det-name">Jay</div>
+                    <div class="details-name" id="det-name">-</div>
                     <button class="btn-edit-name" onclick="editCurrentUserName()" title="Edit Name">✏️ ပြင်ရန်</button>
                 </div>
                 
                 <div class="info-card">
-                    <div class="info-row"><span class="info-label">Contact ID</span><span id="det-id">270972449</span></div>
-                    <div class="info-row"><span class="info-label">Platform</span><span id="det-plat">Telegram</span></div>
-                    <div class="info-row"><span class="info-label">Gender</span><span id="det-gen">Male</span></div>
+                    <div class="info-row"><span class="info-label">Contact ID</span><span id="det-id">-</span></div>
+                    <div class="info-row"><span class="info-label">Platform</span><span id="det-plat">-</span></div>
+                    <div class="info-row"><span class="info-label">Gender</span><span id="det-gen">-</span></div>
                 </div>
 
                 <div style="width: 100%; text-align: left;">
@@ -163,7 +149,7 @@
                     <label>Message Content</label>
                     <textarea id="bc-text" placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့်စာကို ဒီမှာရေးပါ..."></textarea>
                 </div>
-                <button class="btn-danger" onclick="alert('Broadcast sent!')">Send Broadcast Now 🚀</button>
+                <button class="btn-danger" onclick="alert('Broadcast Feature Synced!')">Send Broadcast Now 🚀</button>
             </div>
         </div>
 
@@ -197,7 +183,14 @@
     </div>
 
     <script>
-        // စာမျက်နှာအကူးအပြောင်းလုပ်ရန်
+        // 🔗 မိတ်ဆွေ၏ Live ဖြစ်သွားသော Render URL အစစ်အမှန်
+        const BACKEND_URL = "https://my-custom-chatbox.onrender.com"; 
+
+        let currentActiveUserId = null; 
+        let localCustomNames = JSON.parse(localStorage.getItem('CUSTOM_NAMES')) || {};
+        let totalMessagesCount = 0;
+
+        // တက်ဘ်များ ကူးပြောင်းရန်
         function showTab(tabId, iconId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.menu-icon').forEach(i => i.classList.remove('active'));
@@ -205,41 +198,157 @@
             document.getElementById(iconId).classList.add('active');
         }
 
-        // စာရိုက်ပြီး ပို့လျှင် Chat Screen ပေါ် တိုးလာစေရန်
-        function pushMessage() {
-            let input = document.getElementById('chat-field');
-            let text = input.value.trim();
-            if(text === "") return;
-            
-            let stream = document.getElementById('chat-stream');
-            stream.innerHTML += `<div class="message-wrapper"><div class="message outgoing">${text}</div></div>`;
-            input.value = "";
-            stream.scrollTop = stream.scrollHeight;
+        // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း
+        async function saveSettingsToLocal() {
+            let tgToken = document.getElementById('storage-tg-token').value.trim();
+            let fbToken = document.getElementById('storage-fb-token').value.trim();
+            let fbVerify = document.getElementById('storage-fb-verify').value.trim();
+
+            localStorage.setItem('TG_TOKEN', tgToken);
+            localStorage.setItem('FB_TOKEN', fbToken);
+            localStorage.setItem('FB_VERIFY', fbVerify);
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/save-config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tgToken, fbToken, fbVerify })
+                });
+                if(response.ok) {
+                    alert("✅ Token များကို ဒိုင်ခွက်ပေါ်တွင်ရော Live Server ပေါ်တွင်ပါ တစ်ပြိုင်နက် ချိတ်ဆက်ပြီးပါပြီဗျာ!");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Server သို့ ချိတ်ဆက်ရန် အခက်အခဲရှိနေသော်လည်း Browser တွင် မှတ်သားထားပြီးဖြစ်သည်။");
+            }
         }
 
-        // လူတစ်ယောက်ချင်းစီကို နှိပ်လျှင် ညာဘက်အကွက်မှာ အချက်အလက် ပြောင်းပေးရန်
+        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
+        window.onload = function() {
+            if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
+            if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
+            if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
+            
+            // Server က ဒေတာတွေကို ချက်ချင်း စတင်ဆွဲယူခိုင်းခြင်း
+            fetchLiveUpdates();
+        }
+
+        // 🔄 ၃ စက္ကန့်တစ်ကြိမ် Server ထံမှ စာဝင်/စာထွက်များကို ပုံမှန်ဆွဲယူမည့် နှလုံးခုန်စနစ် (Polling)
+        async function fetchLiveUpdates() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/messages`);
+                const data = await response.json();
+                
+                renderUserList(data.users);
+                renderChatStream(data.logs);
+                checkNewIncomingNotification(data.logs);
+            } catch (e) {
+                console.log("Waiting for data stream connecting...");
+            }
+            setTimeout(fetchLiveUpdates, 3000);
+        }
+
+        // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း
+        function renderUserList(users) {
+            const container = document.getElementById('users-container');
+            if(users.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>`;
+                return;
+            }
+
+            let html = '';
+            users.forEach(user => {
+                let displayName = localCustomNames[user.id] || user.name;
+                let activeClass = user.id == currentActiveUserId ? 'active' : '';
+                let badgeClass = user.platform === 'Telegram' ? 'badge-tg' : 'badge-msg';
+                let platformLabel = user.platform === 'Telegram' ? 'TG' : 'FB';
+                let initial = displayName.charAt(0);
+
+                html += `
+                    <div class="user-item ${activeClass}" id="user-node-${user.id}" onclick="selectUser('${displayName}', '${user.platform}', '${user.id}', '${user.gender}')">
+                        <div class="avatar">${initial}<div class="platform-badge ${badgeClass}">${platformLabel}</div></div>
+                        <div class="user-info">
+                            <div class="user-name"><span>${displayName}</span> <span class="msg-time">${user.time || ''}</span></div>
+                            <div class="last-msg">${user.lastMsg || ''}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // လူတစ်ယောက်ကို ရွေးချယ်လိုက်လျှင် Profile Detail ကို ပြောင်းပေးခြင်း
         function selectUser(name, platform, id, gender) {
-            document.getElementById('active-chat-title').innerText = `💬 Chatting with ${name}`;
-            document.getElementById('det-av').innerText = name.charAt(0);
-            document.getElementById('det-name').innerText = name;
+            currentActiveUserId = id;
+            let displayName = localCustomNames[id] || name;
+
+            document.getElementById('active-chat-title').innerText = `💬 Chatting with ${displayName}`;
+            document.getElementById('det-av').innerText = displayName.charAt(0);
+            document.getElementById('det-name').innerText = displayName;
             document.getElementById('det-id').innerText = id;
             document.getElementById('det-plat').innerText = platform;
             document.getElementById('det-gen').innerText = gender;
-            
-            // Active Item အရောင်ပြောင်းရန်
-            document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
-            document.getElementById(`user-node-${id}`).classList.add('active');
 
-            let stream = document.getElementById('chat-stream');
-            if(platform === 'Telegram') {
-                stream.innerHTML = `<div class="message-wrapper"><div class="message incoming">ငွေသွင်းချင်လို့ပါဗျာ ဘယ်လိုလုပ်ရမလဲရှင့်...</div></div>`;
-            } else {
-                stream.innerHTML = `<div class="message-wrapper"><div class="message incoming">ငွေထုတ် password ကလိုသေးတာလား...</div></div>`;
+            // အရောင်ပြောင်းရန်
+            document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
+            const currentNode = document.getElementById(`user-node-${id}`);
+            if(currentNode) currentNode.classList.add('active');
+
+            // မက်ဆေ့ခ်ျများကို ချက်ချင်း စစ်ထုတ်ပြရန်
+            fetch(`${BACKEND_URL}/api/messages`)
+                .then(res => res.json())
+                .then(data => renderChatStream(data.logs));
+        }
+
+        // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ အစီအစဉ်တကျ ပြသခြင်း
+        function renderChatStream(logs) {
+            if(!currentActiveUserId) return;
+            
+            const stream = document.getElementById('chat-stream');
+            // လက်ရှိ စကားပြောနေသူ၏ မက်ဆေ့ခ်ျများကိုသာ ဇကာတင်စစ်ထုတ်မည်
+            let activeLogs = logs.filter(log => log.userId == currentActiveUserId);
+            
+            if(activeLogs.length === 0) {
+                stream.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျမရှိသေးပါ စာစတင်ရိုက်ပို့နိုင်ပါသည်</p>`;
+                return;
+            }
+
+            let html = '';
+            activeLogs.forEach(log => {
+                let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
+                html += `<div class="message-wrapper"><div class="message ${sideClass}">${log.text}</div></div>`;
+            });
+            
+            // လက်ရှိရှိနေသည့် စာမျက်နှာကို အောက်ဆုံးသို့ အော်တိုဆွဲချရန်
+            let isScrollAtBottom = stream.scrollHeight - stream.clientHeight <= stream.scrollTop + 100;
+            stream.innerHTML = html;
+            if(isScrollAtBottom || totalMessagesCount === 0) {
+                stream.scrollTop = stream.scrollHeight;
+            }
+        }
+
+        // စာအသစ်ဝင်လာပါက Noti တက်စေပြီး အသံမြည်စေသည့်စနစ်
+        function checkNewIncomingNotification(logs) {
+            if(logs.length > totalMessagesCount) {
+                let lastLog = logs[logs.length - 1];
+                if(lastLog.sender === 'user') {
+                    let senderName = localCustomNames[lastLog.userId] || `User ID: ${lastLog.userId}`;
+                    document.getElementById('noti-sound').play();
+                    
+                    let notiBox = document.getElementById('notification-box');
+                    document.getElementById('noti-sender').innerText = `🔔 စာအသစ်ဝင်လာသည် (${senderName})`;
+                    document.getElementById('noti-text').innerText = lastLog.text;
+                    
+                    notiBox.style.display = "flex";
+                    setTimeout(() => notiBox.style.display = "none", 4000);
+                }
+                totalMessagesCount = logs.length;
             }
         }
 
         // 📝 စိတ်ကြိုက် နာမည်ပြောင်းပေးနိုင်မည့်စနစ် (Contact Name Customization)
         function editCurrentUserName() {
+            if(!currentActiveUserId) return;
             let currentId = document.getElementById('det-id').innerText;
             let currentName = document.getElementById('det-name').innerText;
             
@@ -247,56 +356,51 @@
             
             if (newName && newName.trim() !== "") {
                 newName = newName.trim();
-                // 1. Right Sidebar မှာ နာမည်ပြောင်းမယ်
+                localCustomNames[currentId] = newName;
+                localStorage.setItem('CUSTOM_NAMES', JSON.stringify(localCustomNames));
+                
+                // UI များကို ချက်ချင်း Update လုပ်ခြင်း
                 document.getElementById('det-name').innerText = newName;
                 document.getElementById('det-av').innerText = newName.charAt(0);
-                
-                // 2. ဘယ်ဘက် User List စာရင်းထဲမှာ နာမည် သွားပြောင်းမယ်
-                document.getElementById(`list-name-${currentId}`).innerText = newName;
-                document.getElementById(`avatar-${currentId}`).firstChild.textContent = newName.charAt(0);
-                
-                // 3. Chat Header က ခေါင်းစဉ်ကိုပါ ပြောင်းမယ်
                 document.getElementById('active-chat-title').innerText = `💬 Chatting with ${newName}`;
             }
         }
 
-        // 💾 Settings များ သိမ်းဆည်းခြင်း စနစ်
-        function saveSettingsToLocal() {
-            let tgToken = document.getElementById('storage-tg-token').value;
-            let fbToken = document.getElementById('storage-fb-token').value;
-            let fbVerify = document.getElementById('storage-fb-verify').value;
-
-            localStorage.setItem('TG_TOKEN', tgToken);
-            localStorage.setItem('FB_TOKEN', fbToken);
-            localStorage.setItem('FB_VERIFY', fbVerify);
-
-            alert("✅ သင်ထည့်သွင်းလိုက်သော API Keys များနှင့် Token များကို စနစ်ထဲတွင် အောင်မြင်စွာ မှတ်သားထားလိုက်ပါပြီဗျာ!");
-        }
-
-        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များရှိက ပြန်ဖော်ပေးရန်
-        window.onload = function() {
-            if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
-            if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
-            if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
-        }
-
-        // 🔔 စာဝင်လျှင် Notification အသံထွက်ပြီး Toast ပေါ်လာစေမည့်စနစ် (Demo Test)
-        function triggerDemoNotification() {
-            // ၁။ အသံဖွင့်ခြင်း
-            let sound = document.getElementById('noti-sound');
-            sound.play();
-
-            // ၂။ Toast Box ဖော်ခြင်း
-            let notiBox = document.getElementById('notification-box');
-            document.getElementById('noti-sender').innerText = "🔔 Telegram စာအသစ်ဝင်လာသည်";
-            document.getElementById('noti-text').innerText = "Jay: 'ငွေသွင်းပြီးပါပြီ ခင်ဗျာ စစ်ပေးပါဦး'";
+        // စာရိုက်ပြီး Send နှိပ်လျှင် Telegram/Messenger သို့ တကယ်ထွက်သွားစေမည့်စနစ်
+        async function pushMessage() {
+            let input = document.getElementById('chat-field');
+            let text = input.value.trim();
+            if(text === "" || !currentActiveUserId) return;
             
-            notiBox.style.display = "flex";
+            let platform = document.getElementById('det-plat').innerText;
+            let userId = document.getElementById('det-id').innerText;
 
-            // ၃။ ၄ စက္ကန့်ပြည့်ရင် အလိုအလျောက် ပြန်ဖျောက်ခြင်း
-            setTimeout(() => {
-                notiBox.style.display = "none";
-            }, 4000);
+            // UI တွင် ချက်ချင်းကြိုတင်ပြသထားရန်
+            let stream = document.getElementById('chat-stream');
+            stream.innerHTML += `<div class="message-wrapper"><div class="message outgoing">${text}</div></div>`;
+            input.value = "";
+            stream.scrollTop = stream.scrollHeight;
+
+            // Server မှတစ်ဆင့် သက်ဆိုင်ရာ Platform ဆီ ပို့ခြင်း
+            try {
+                await fetch(`${BACKEND_URL}/api/send-message`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text, userId, platform })
+                });
+            } catch (e) {
+                console.error("စာပို့ရန် အခက်အခဲရှိနေသည်:", e);
+            }
+        }
+
+        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန်
+        function triggerDemoNotification() {
+            document.getElementById('noti-sound').play();
+            let notiBox = document.getElementById('notification-box');
+            document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
+            document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
+            notiBox.style.display = "flex";
+            setTimeout(() => notiBox.style.display = "none", 4000);
         }
     </script>
 </body>
