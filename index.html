@@ -227,7 +227,6 @@
 
             if (type === 'tg') {
                 localStorage.setItem('TG_TOKEN', tgToken);
-                // Facebook keys များကို အလွတ်မဖြစ်သွားစေရန် server သို့ လက်ရှိတန်ဖိုးများအတိုင်း ပြန်တွဲပို့ပေးပါမည်
             } else if (type === 'fb') {
                 localStorage.setItem('FB_TOKEN', fbToken);
                 localStorage.setItem('FB_VERIFY', fbVerify);
@@ -252,7 +251,7 @@
             }
         }
 
-        // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း (အဟောင်း - ခလုတ်ဖျက်လိုက်သော်လည်း logic သဘောအရ ထားရှိပါသည်)
+        // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း
         async function saveSettingsToLocal() {
             let tgToken = document.getElementById('storage-tg-token').value.trim();
             let fbToken = document.getElementById('storage-fb-token').value.trim();
@@ -283,17 +282,14 @@
             if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
             if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
             
-            // Server က ဒေတာတွေကို ချက်ချင်း စတင်ဆွဲယူခိုင်းခြင်း
             fetchLiveUpdates();
 
-            // 🆕 Chatbox ထဲက ပုံတွေကို ထောက်ပြီး နှိပ်လိုက်ရင် ပုံကြီးပွင့်လာစေမည့် Event Listener စနစ်
             document.getElementById('chat-stream').addEventListener('click', function(e) {
                 if (e.target && e.target.tagName === 'IMG') {
                     openImageZoomModal(e.target.src);
                 }
             });
 
-            // 🆕 ပုံကြီးပွင့်နေချိန် နောက်ခံအမည်းရောင်နေရာကို နှိပ်လိုက်လျှင် ပြန်ပိတ်ပေးမည့် စနစ်
             document.getElementById('zoom-img-modal').addEventListener('click', function(e) {
                 if (e.target.id === 'zoom-img-modal') {
                     closeImageZoomModal();
@@ -309,7 +305,7 @@
             modalImg.src = imgSrc;
         }
 
-        // 🆕 Image Zoom Modal ပိတ်ရန် Function
+        // 🆕 Image Zoom Modal ปိတ်ရန် Function
         function closeImageZoomModal() {
             document.getElementById('zoom-img-modal').style.display = "none";
         }
@@ -320,11 +316,18 @@
                 const response = await fetch(`${BACKEND_URL}/api/messages`);
                 const data = await response.json();
                 
-                // Сonversations စာရင်းကို အမြဲဆွဲယူရန်
                 let currentTotalUnread = data.users.reduce((sum, u) => sum + (u.unread || 0), 0);
                 
+                // ⚠️ Fix: တကယ့် စာအသစ်ဝင်လာချိန်တွင် Autoplay Block ကို ကျော်ဖြတ်ပြီး အသံမြည်စေရန် ပြင်ဆင်ခြင်း
                 if (currentTotalUnread > previousTotalUnread) {
-                    document.getElementById('noti-sound').play().catch(e => console.log("Audio playback raw block handled"));
+                    const sound = document.getElementById('noti-sound');
+                    if (sound) {
+                        sound.currentTime = 0;
+                        sound.play().catch(error => {
+                            console.log("Browser blocked real-time sound play. Waiting for click workaround...");
+                            document.body.addEventListener('click', () => { sound.play(); }, { once: true });
+                        });
+                    }
                 }
                 previousTotalUnread = currentTotalUnread;
 
@@ -422,13 +425,10 @@
             let html = '';
             activeLogs.forEach(log => {
                 let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
-                
-                // လင့်ခ်သည် ပုံလင့်ခ်ဖြစ်နေပါက <img> tag ဖြင့် ပုံအဖြစ် တိုက်ရိုက်ပြသရန် စစ်ဆေးခြင်း
                 const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
                 
-                // 🆕 ပုံကြီးချဲ့စနစ်နှင့် ချိတ်ဆက်နိုင်ရန် window.open နေရာတွင် သတ်မှတ်ချက်ကို ဖယ်ထုတ်ပြီး IMG များကို တိုက်ရိုက် render လုပ်ထားပါသည်
                 let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0行業;"/>`
                     : log.text;
 
                 html += `<div class="message-wrapper"><div class="message ${sideClass}">${renderContent}</div></div>`;
@@ -453,7 +453,6 @@
             let userId = document.getElementById('det-id').innerText;
 
             try {
-                // အခမဲ့ ImgBB API သုံး၍ ပုံအား Direct Image Link ပြောင်းလဲခြင်း
                 const res = await fetch('https://api.imgbb.com/1/upload?key=5ad4eff014b84be4fcefeb2430570765', {
                     method: 'POST',
                     body: formData
@@ -462,15 +461,12 @@
                 
                 if(data.success) {
                     const uploadedUrl = data.data.url;
-                    
-                    // Server သို့ ပုံလင့်ခ် ပို့ဆောင်ခြင်း
                     await fetch(`${BACKEND_URL}/api/send-message`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ text: uploadedUrl, userId, platform })
                     });
-                    
-                    input.value = ""; // ဖိုင်ရွေးထားသည်ကို Reset လုပ်ခြင်း
+                    input.value = "";
                 } else {
                     alert("ပုံတင်ခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားကြည့်ပါ။");
                 }
@@ -490,7 +486,6 @@
                     let notiBox = document.getElementById('notification-box');
                     document.getElementById('noti-sender').innerText = `🔔 စာအသစ်ဝင်လာသည် (${senderName})`;
                     
-                    // Noti Box ထဲတွင် ပုံလင့်ခ်ဖြစ်ပါက 📷 Photo ဟုပြရန်
                     const isImg = lastLog.text.startsWith('http') && (lastLog.text.match(/\.(jpeg|jpg|gif|png)$/) || lastLog.text.includes('file/bot'));
                     document.getElementById('noti-text').innerText = isImg ? "📷 Send you a photo" : lastLog.text;
                     
@@ -501,7 +496,7 @@
             }
         }
 
-        // 📝 စိတ်ကြိုက် နာမည်ပြောင်းပေးနိုင်မည့်စနစ် (Contact Name Customization)
+        // 📝 စိတ်ကြိုက် နာမည်ပြောင်းပေးနိုင်မည့်စနစ်
         function editCurrentUserName() {
             if(!currentActiveUserId) return;
             let currentId = document.getElementById('det-id').innerText;
@@ -520,7 +515,7 @@
             }
         }
 
-        // စာရိုက်ပြီး Send နှိပ်လျှင် Telegram/Messenger သို့ တကယ်ထွက်သွားစေမည့်စနစ်
+        // စာရိုက်ပြီး Send နှိပ်လျှင် ထွက်သွားစေမည့်စနစ်
         async function pushMessage() {
             let input = document.getElementById('chat-field');
             let text = input.value.trim();
@@ -545,7 +540,7 @@
             }
         }
 
-        // 📢 စာသားရော ဓာတ်ပုံလင့်ခ်ပါ ပူးတွဲပို့နိုင်မည့် Broadcast စနစ်သစ် လုပ်ဆောင်ချက်
+        // 📢 Broadcast စနစ်သစ် လုပ်ဆောင်ချက်
         async function executeBroadcast() {
             const text = document.getElementById('bc-text').value.trim();
             const imageUrl = document.getElementById('bc-image-url').value.trim();
@@ -575,25 +570,23 @@
             }
         }
 
-        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် (စနစ်တကျ ပြင်ဆင်ပြီး)
-function triggerDemoNotification() {
-    const sound = document.getElementById('noti-sound');
-    if (sound) {
-        sound.currentTime = 0;
-        sound.play().catch(error => {
-            console.log("Browser blocked autoplay, waiting for click...");
-            document.body.addEventListener('click', () => { sound.play(); }, { once: true });
-        });
-    }
+        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန်
+        function triggerDemoNotification() {
+            const sound = document.getElementById('noti-sound');
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(error => {
+                    console.log("Browser blocked autoplay, waiting for click...");
+                    document.body.addEventListener('click', () => { sound.play(); }, { once: true });
+                });
+            }
 
-    let notiBox = document.getElementById('notification-box');
-    document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
-    document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
-    notiBox.style.display = "flex";
-    
-    // ⚠️ Fix: setTimeout syntax အမှန်ပြင်ထားသည် (comma မဟုတ်ဘဲ bracket အပိတ်မှန်ရန်)
-    setTimeout(() => { notiBox.style.display = "none"; }, 4000);
-}
+            let notiBox = document.getElementById('notification-box');
+            document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
+            document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
+            notiBox.style.display = "flex";
+            setTimeout(() => { notiBox.style.display = "none"; }, 4000);
+        }
     </script>
 </body>
 </html>
