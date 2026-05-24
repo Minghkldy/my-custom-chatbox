@@ -3,129 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Chatbox Dashboard</title>
+    <title>Chatrace Style Inbox</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { display: flex; height: 100vh; background-color: #f4f6f9; }
+        body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; overflow: hidden; }
         
-        /* Sidebar အပြင်အဆင် */
-        .sidebar { width: 250px; background-color: #1f2937; color: white; padding: 20px; }
-        .sidebar h2 { margin-bottom: 30px; font-size: 20px; }
-        .sidebar ul { list-style: none; }
-        .sidebar ul li { padding: 12px; margin-bottom: 10px; background: #374151; border-radius: 6px; cursor: pointer; }
-        .sidebar ul li.active { background: #2563eb; }
+        /* 1. ဘယ်ဘက်အစွန်းဆုံး ပင်မ Menu Bar (Icon သီးသန့်) */
+        .main-sidebar { width: 70px; background-color: #080d16; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; border-right: 1px solid #1f2937; }
+        .menu-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 20px; color: #9ca3af; transition: 0.2s; }
+        .menu-icon:hover, .menu-icon.active { background-color: #1e293b; color: #3b82f6; }
 
-        /* Main Content Container */
-        .main-content { flex: 1; display: flex; flex-direction: column; }
-        
-        /* Pages */
-        .page { display: none; flex-direction: column; flex: 1; }
+        /* Main App Content Wrapper */
+        .app-container { flex: 1; display: flex; }
+        .page { display: none; width: 100%; height: 100%; }
         .page.active { display: flex; }
 
-        .chat-header { background: white; padding: 20px; border-bottom: 1px solid #e5e7eb; font-weight: bold; }
-        
-        /* Message Area */
-        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .message { padding: 10px 15px; border-radius: 8px; max-width: 60%; }
-        .message.incoming { background: white; align-self: flex-start; border: 1px solid #e5e7eb; }
-        .message.outgoing { background: #2563eb; color: white; align-self: flex-end; }
+        /* 2. INBOX PAGE - User List (စကားပြောထားသူများစာရင်း) */
+        .user-sidebar { width: 320px; background-color: #111827; border-right: 1px solid #1f2937; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 15px; border-bottom: 1px solid #1f2937; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; }
+        .user-list { flex: 1; overflow-y: auto; }
+        .user-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1f2937; cursor: pointer; transition: 0.2s; gap: 12px; }
+        .user-item:hover, .user-item.active { background-color: #1f2937; }
+        .avatar { width: 40px; height: 40px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; }
+        .platform-badge { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; color: white; }
+        .badge-tg { background-color: #0088cc; }
+        .badge-msg { background-color: #006aff; }
+        .user-info { flex: 1; }
+        .user-name { font-weight: bold; font-size: 14px; margin-bottom: 4px; display: flex; justify-content: space-between; }
+        .msg-time { font-size: 11px; color: #6b7280; font-weight: normal; }
+        .last-msg { font-size: 12px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 180px; }
 
-        /* Input Area */
-        .chat-input-area { background: white; padding: 15px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
-        .chat-input-area input { flex: 1; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; outline: none; }
-        .chat-input-area button { background: #2563eb; color: white; border: none; padding: 0 20px; border-radius: 6px; cursor: pointer; }
+        /* 3. INBOX PAGE - Middle Chat Area (စကားပြောခန်း) */
+        .chat-area { flex: 1; display: flex; flex-direction: column; background-color: #0f172a; }
+        .chat-header { height: 60px; background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; align-items: center; padding: 0 20px; font-weight: bold; justify-content: space-between; }
+        .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .message-wrapper { display: flex; flex-direction: column; width: 100%; }
+        .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; }
+        .message.incoming { background-color: #1e293b; color: #f3f4f6; align-self: flex-start; border-bottom-left-radius: 2px; }
+        .message.outgoing { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .chat-input-container { padding: 15px 20px; background-color: #111827; border-top: 1px solid #1f2937; display: flex; gap: 12px; align-items: center; }
+        .chat-input-container input { flex: 1; background-color: #1f2937; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; }
+        .chat-input-container button { background-color: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-        /* Broadcast Page CSS */
-        .broadcast-container { padding: 30px; max-width: 600px; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
-        .form-group textarea { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; height: 120px; resize: none; outline: none; }
-        .form-group select { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; }
-        .btn-broadcast { background: #dc2626; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        /* 4. INBOX PAGE - Right Sidebar (အသုံးပြုသူအချက်အလက်) */
+        .details-sidebar { width: 300px; background-color: #111827; border-left: 1px solid #1f2937; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow-y: auto; }
+        .details-avatar { width: 80px; height: 80px; background-color: #374151; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; }
+        .details-name { font-size: 18px; font-weight: bold; }
+        .info-card { width: 100%; background-color: #1f2937; padding: 15px; border-radius: 8px; display: flex; flex-direction: column; gap: 12px; font-size: 13px; }
+        .info-row { display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding-bottom: 8px; }
+        .info-row:last-child { border: none; padding: 0; }
+        .info-label { color: #9ca3af; }
+        .tags-container { width: 100%; text-align: left; }
+        .tags-title { font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #9ca3af; }
+        .tag-item { display: inline-block; background-color: #374151; color: #3b82f6; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+
+        /* BROADCAST PAGE OVERLAY (If Clicked) */
+        .broadcast-view { padding: 40px; display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 600px; margin: 0 auto; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; }
+        .form-group label { font-size: 14px; font-weight: bold; color: #9ca3af; }
+        .form-group select, .form-group textarea { background-color: #111827; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; }
+        .form-group textarea { height: 150px; resize: none; }
+        .btn-send-bc { background-color: #dc2626; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; }
     </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>My Chatbox</h2>
-        <ul>
-            <li id="menu-inbox" class="active" onclick="switchPage('inbox-page', 'menu-inbox')">📥 All Inboxes</li>
-            <li id="menu-broadcast" onclick="switchPage('broadcast-page', 'menu-broadcast')">📢 Broadcast (ပို့ရန်)</li>
-        </ul>
+    <div class="main-sidebar">
+        <div class="menu-icon active" id="ico-inbox" onclick="showTab('inbox-tab', 'ico-inbox')" title="Inbox">📥</div>
+        <div class="menu-icon" id="ico-bc" onclick="showTab('bc-tab', 'ico-bc')" title="Broadcast">📢</div>
     </div>
 
-    <div class="main-content">
+    <div class="app-container">
         
-        <div id="inbox-page" class="page active">
-            <div class="chat-header">💬 Telegram & Messenger Messages</div>
-            <div class="chat-messages" id="chat-box">
-                <div class="message incoming">ဟယ်လို! Telegram ကနေ ဆက်သွယ်လိုက်တာပါဗျာ။</div>
-                <div class="message outgoing">ဟုတ်ကဲ့ မင်္ဂလာပါခင်ဗျာ။ ဘာကူညီပေးရမလဲ။</div>
+        <div id="inbox-tab" class="page active">
+            <div class="user-sidebar">
+                <div class="sidebar-header">
+                    <span>Inbox Conversations</span>
+                </div>
+                <div class="user-list">
+                    <div class="user-item active" onclick="selectUser('Jay', 'Telegram', '270972449', 'Male')">
+                        <div class="avatar">J<div class="platform-badge badge-tg">TG</div></div>
+                        <div class="user-info">
+                            <div class="user-name">Jay <span class="msg-time">10 hours</span></div>
+                            <div class="last-msg">ငွေသွင်းချင်လို့ပါဗျာ ဘယ်လိုလုပ်ရမလဲရှင့်...</div>
+                        </div>
+                    </div>
+                    <div class="user-item" onclick="selectUser('UW00213', 'Messenger', '543210987', 'Female')">
+                        <div class="avatar">U<div class="platform-badge badge-msg">FB</div></div>
+                        <div class="user-info">
+                            <div class="user-name">UW00213 <span class="msg-time">9 hours</span></div>
+                            <div class="last-msg">ငွေထုတ် password ကလိုသေးတာလား...</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="chat-input-area">
-                <input type="text" id="msg-input" placeholder="ဒီနေရာမှာ စာရိုက်ပါ...">
-                <button onclick="sendMessage()">Send</button>
+
+            <div class="chat-area">
+                <div class="chat-header">
+                    <span id="active-chat-title">💬 Chatting with Jay</span>
+                </div>
+                <div class="chat-messages" id="chat-stream">
+                    <div class="message-wrapper"><div class="message incoming">ငွေသွင်းချင်လို့ပါဗျာ ဘယ်လိုလုပ်ရမလဲရှင့်...</div></div>
+                    <div class="message-wrapper"><div class="message outgoing">မင်္ဂလာပါခင်ဗျာ။ ကူညီပေးပါရစေ။</div></div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-field" placeholder="Type a message...">
+                    <button onclick="pushMessage()">Send</button>
+                </div>
+            </div>
+
+            <div class="details-sidebar">
+                <div class="details-avatar" id="det-av">J</div>
+                <div class="details-name" id="det-name">Jay</div>
+                
+                <div class="info-card">
+                    <div class="info-row"><span class="info-label">Contact ID</span><span id="det-id">270972449</span></div>
+                    <div class="info-row"><span class="info-label">Platform</span><span id="det-plat">Telegram</span></div>
+                    <div class="info-row"><span class="info-label">Gender</span><span id="det-gen">Male</span></div>
+                    <div class="info-row"><span class="info-label">Local Time</span><span>02:33</span></div>
+                </div>
+
+                <div class="tags-container">
+                    <div class="tags-title">Tags</div>
+                    <div class="tag-item">Customer</div>
+                </div>
             </div>
         </div>
 
-        <div id="broadcast-page" class="page">
-            <div class="chat-header">📢 Send Broadcast Message</div>
-            <div class="broadcast-container">
+        <div id="bc-tab" class="page">
+            <div class="broadcast-view">
+                <h2>📢 Send Broadcast Message</h2>
                 <div class="form-group">
-                    <label>ဘယ်သူတွေဆီ ပို့မလဲ (Target Platform)</label>
-                    <select id="broadcast-platform">
-                        <option value="all">Telegram & Messenger အားလုံး</option>
-                        <option value="telegram">Telegram Users သီးသန့်</option>
-                        <option value="messenger">Messenger Users သီးသန့်</option>
+                    <label>Target Audience</label>
+                    <select>
+                        <option>Telegram & Messenger Users All</option>
+                        <option>Telegram Users Only</option>
+                        <option>Messenger Users Only</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>မက်ဆေ့ခ်ျ ရေးရန်</label>
-                    <textarea id="broadcast-text" placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့် စာသားကို ဒီမှာ ရေးပါ..."></textarea>
+                    <label>Message Content</label>
+                    <textarea placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့်စာကို ဒီမှာရေးပါ..."></textarea>
                 </div>
-                <button class="btn-broadcast" onclick="sendBroadcast()">Send Broadcast Now 🚀</button>
+                <button class="btn-send-bc" onclick="alert('Broadcast sent!')">Send Broadcast Now 🚀</button>
             </div>
         </div>
 
     </div>
 
     <script>
-        // စာမျက်နှာအကူးအပြောင်း လုပ်ရန် Function
-        function switchPage(pageId, menuId) {
-            // Page အားလုံးကို ဖျောက်ပါ
+        // Tab ပြောင်းရန်
+        function showTab(tabId, iconId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // Active ဖြစ်မယ့် Page ကို ပြပါ
-            document.getElementById(pageId).classList.add('active');
-
-            // Menu အရောင်ပြောင်းရန်
-            document.querySelectorAll('.sidebar ul li').forEach(m => m.classList.remove('active'));
-            document.getElementById(menuId).classList.add('active');
+            document.querySelectorAll('.menu-icon').forEach(i => i.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.getElementById(iconId).classList.add('active');
         }
 
-        // Chat Box ထဲ စာရိုက်ပြီး Send နှိပ်ရင် ချက်ချင်း ပေါ်လာစေရန်
-        function sendMessage() {
-            let input = document.getElementById('msg-input');
+        // စာရိုက်ပြီး ပို့လျှင် Chat Box ထဲ တိုးလာစေရန်
+        function pushMessage() {
+            let input = document.getElementById('chat-field');
             let text = input.value.trim();
             if(text === "") return;
-
-            let chatBox = document.getElementById('chat-box');
-            let newMsg = document.getElementById('chat-box');
             
-            // Outgoing Message အသစ်ထည့်ခြင်း
-            chatBox.innerHTML += `<div class="message outgoing">${text}</div>`;
-            input.value = ""; // စာသားကွက်လပ်ကို ရှင်းထုတ်ရန်
-            chatBox.scrollTop = chatBox.scrollHeight; // အောက်ဆုံးသို့ ဆွဲချရန်
+            let stream = document.getElementById('chat-stream');
+            stream.innerHTML += `<div class="message-wrapper"><div class="message outgoing">${text}</div></div>`;
+            input.value = "";
+            stream.scrollTop = stream.scrollHeight;
         }
 
-        // Broadcast ပို့သည့် လုပ်ဆောင်ချက် (လောလောဆယ် Alert ပြထားမည်)
-        function sendBroadcast() {
-            let text = document.getElementById('broadcast-text').value;
-            let platform = document.getElementById('broadcast-platform').value;
-            if(text.trim() === "") {
-                alert("ကျေးဇူးပြု၍ မက်ဆေ့ခ်ျ ရေးပေးပါဦး!");
-                return;
+        // လူတစ်ယောက်ချင်းစီကို နှိပ်လျှင် ညာဘက်အကွက်မှာ အချက်အလက် ပြောင်းပေးရန်
+        function selectUser(name, platform, id, gender) {
+            document.getElementById('active-chat-title').innerText = `💬 Chatting with ${name}`;
+            document.getElementById('det-av').innerText = name.charAt(0);
+            document.getElementById('det-name').innerText = name;
+            document.getElementById('det-id').innerText = id;
+            document.getElementById('det-plat').innerText = platform;
+            document.getElementById('det-gen').innerText = gender;
+            
+            // Chat Box သန့်ရှင်းရေးလုပ်ပြီး ဒေတာအတုပြောင်းရန်
+            let stream = document.getElementById('chat-stream');
+            if(platform === 'Telegram') {
+                stream.innerHTML = `<div class="message-wrapper"><div class="message incoming">ငွေသွင်းချင်လို့ပါဗျာ ဘယ်လိုလုပ်ရမလဲရှင့်...</div></div>`;
+            } else {
+                stream.innerHTML = `<div class="message-wrapper"><div class="message incoming">ငွေထုတ် password ကလိုသေးတာလား...</div></div>`;
             }
-            alert(`စနစ်ပြင်ဆင်နေဆဲဖြစ်သည်! \nPlatform: ${platform} \nMessage: ${text}`);
         }
     </script>
 </body>
