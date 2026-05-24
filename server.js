@@ -4,7 +4,9 @@ const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
-app.use(express.json());
+// 📷 ပုံများကို Base64 (သို့မဟုတ်) Request ပမာဏကြီးကြီးမားမား လှမ်းပို့ပါက ဆာဗာဆီမှ Error မတက်စေရန် Limit တိုးမြှင့်ခြင်း
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(cors());
 
 // 🔗 သင်၏ Render URL အစစ်အမှန်ကို ဤနေရာတွင် တိုက်ရိုက်သတ်မှတ်ပေးလိုက်ပါသည်
@@ -87,31 +89,33 @@ app.post('/api/send-message', async (req, res) => {
     res.sendStatus(200);
 });
 
-// 📢 Broadcast Message (လူအကုန်လုံးကို တစ်ပြိုင်နက်စာပို့ရန် API လမ်းကြောင်းအသစ်)
+// 📢 Broadcast Message (လူအကုန်လုံးကို စာသားရော ပုံပါ တစ်ပြိုင်နက် တွဲပို့နိုင်သည့် API လမ်းကြောင်း)
 app.post('/api/broadcast', async (req, res) => {
-    const { text } = req.body;
-    if (!text) return res.status(400).send('Message text is required');
+    const { text, imageUrl } = req.body;
+    if (!text && !imageUrl) return res.status(400).send('Message text or image is required');
 
     console.log(`📢 Broadcast စတင်နေပြီ... လူဦးရေစုစုပေါင်း: ${userList.length} ယောက်`);
 
     // လူတိုင်းဆီ Loop ပတ်ပြီး တစ်ယောက်ချင်းစီ လိုက်ပို့ပေးခြင်း
     for (const user of userList) {
-        messageLogs.push({ userId: user.id, text: text, sender: 'admin', timestamp: new Date() });
-        user.lastMsg = text.startsWith('http') && (text.match(/\.(jpeg|jpg|gif|png)$/) || text.includes('file/bot')) ? '📷 Photo' : text;
-        user.time = 'Just Now';
-
         if (user.platform === 'Telegram' && configStorage.tgToken) {
             try {
-                const isPhoto = text.startsWith('http') && (text.match(/\.(jpeg|jpg|gif|png)$/) || text.includes('file/bot'));
-                if (isPhoto) {
-                    await axios.post(`https://api.telegram.org/bot${configStorage.tgToken}/sendPhoto`, { chat_id: user.id, photo: text });
-                } else {
+                // ၁။ ပုံပါလာလျှင် ပုံအရင်ပို့မည်
+                if (imageUrl) {
+                    messageLogs.push({ userId: user.id, text: imageUrl, sender: 'admin', timestamp: new Date() });
+                    await axios.post(`https://api.telegram.org/bot${configStorage.tgToken}/sendPhoto`, { chat_id: user.id, photo: imageUrl });
+                }
+                // ၂။ စာသားပါလာလျှင် စာသား ဆက်ပို့မည်
+                if (text) {
+                    messageLogs.push({ userId: user.id, text: text, sender: 'admin', timestamp: new Date() });
                     await axios.post(`https://api.telegram.org/bot${configStorage.tgToken}/sendMessage`, { chat_id: user.id, text: text });
                 }
             } catch (err) {
                 console.error(`❌ Broadcast ပို့မရပါ (User: ${user.id}):`, err.message);
             }
         }
+        user.lastMsg = text ? text : '📷 Photo';
+        user.time = 'Just Now';
     }
     res.status(200).send({ success: true, message: 'Broadcast sent successfully!' });
 });
