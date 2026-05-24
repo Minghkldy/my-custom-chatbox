@@ -1,0 +1,26 @@
+<div id="settings-tab" class="page">
+    <div class="panel-view">
+        <h2>⚙️ Channels Connection Settings</h2>
+        <p style="color: #9ca3af; font-size: 14px; margin-bottom: 10px;">Telegram Token များနှင့် Messenger API များကို Website Dashboard ပေါ်မှ တိုက်ရိုက် ဆက်သွယ်ချက်ဆက်ရန်နေရာ ဖြစ်သည်။</p>
+        
+        <hr style="border: 0; border-top: 1px solid #1f2937; margin-bottom: 15px;">
+
+        <h3 style="color: #0088cc; margin-bottom: 10px;">🤖 Telegram Bot Setup</h3>
+        <div class="form-group">
+            <label>Telegram Bot Token API</label>
+            <input type="text" id="storage-tg-token" placeholder="ဥပမာ- 746291039:AAFlk93_Djs93...">
+        </div>
+        <button class="btn-primary" onclick="saveSingleSetting('tg')" style="background-color: #0088cc; margin-bottom: 25px;">Save Telegram Token Only 🤖</button>
+
+        <h3 style="color: #006aff; margin-top: 20px; margin-bottom: 10px;">💬 Facebook Messenger Setup</h3>
+        <div class="form-group">
+            <label>Messenger Page Access Token</label>
+            <input type="text" id="storage-fb-token" placeholder="EAAGm... ဟုစမည့် Page Access Token အရှည်ကြီး ထည့်ပါ">
+        </div>
+        <div class="form-group">
+            <label>Webhook Verify Token (Render နှင့် ချိတ်စဉ်က သုံးခဲ့သော လျှို့ဝှက်စာလုံး)</label>
+            <input type="text" id="storage-fb-verify" placeholder="ဥပမာ- my_super_secret_token_123">
+        </div>
+        <button class="btn-primary" onclick="saveSingleSetting('fb')" style="background-color: #006aff;">Save Facebook Settings Only 💬</button>
+    </div>
+</div>
