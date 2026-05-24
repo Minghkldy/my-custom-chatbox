@@ -68,6 +68,15 @@
         /* NOTIFICATION TOAST */
         .noti-toast { position: fixed; top: 20px; right: 20px; background-color: #1e293b; border-left: 4px solid #3b82f6; padding: 15px 25px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: none; gap: 10px; align-items: center; z-index: 9999; animation: slideIn 0.3s ease; }
         @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+        /* 🆕 IMAGE LIGHTBOX MODAL STYLES */
+        .image-zoom-modal { position: fixed; z-index: 99999; padding-top: 40px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.9); }
+        .zoom-modal-content { margin: auto; display: block; max-width: 85%; max-height: 85vh; object-fit: contain; border-radius: 6px; animation: zoomInEffect 0.2s ease-in-out; }
+        @keyframes zoomInEffect { from { transform: scale(0.75); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .zoom-close-btn { position: absolute; top: 15px; right: 35px; color: #f3f4f6; font-size: 40px; font-weight: bold; cursor: pointer; transition: 0.2s; user-select: none; }
+        .zoom-close-btn:hover { color: #9ca3af; }
+        .chat-messages img { cursor: pointer; transition: opacity 0.2s; }
+        .chat-messages img:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -172,6 +181,7 @@
                     <label>Telegram Bot Token API</label>
                     <input type="text" id="storage-tg-token" placeholder="ဥပမာ- 746291039:AAFlk93_Djs93...">
                 </div>
+                <button class="btn-primary" onclick="saveSingleSetting('tg')" style="background-color: #0088cc; margin-bottom: 25px;">Save Telegram Token Only 🤖</button>
 
                 <h3 style="color: #006aff; margin-top: 20px; margin-bottom: 10px;">💬 Facebook Messenger Setup</h3>
                 <div class="form-group">
@@ -182,11 +192,15 @@
                     <label>Webhook Verify Token (Render နှင့် ချိတ်စဉ်က သုံးခဲ့သော လျှို့ဝှက်စာလုံး)</label>
                     <input type="text" id="storage-fb-verify" placeholder="ဥပမာ- my_super_secret_token_123">
                 </div>
-
-                <button class="btn-primary" onclick="saveSettingsToLocal()">Save API Keys Successfully 💾</button>
+                <button class="btn-primary" onclick="saveSingleSetting('fb')" style="background-color: #006aff;">Save Facebook Settings Only 💬</button>
             </div>
         </div>
 
+    </div>
+
+    <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
+        <span class="zoom-close-btn" onclick="closeImageZoomModal()">&times;</span>
+        <img class="zoom-modal-content" id="zoom-target-src">
     </div>
 
     <script>
@@ -206,7 +220,40 @@
             document.getElementById(iconId).classList.add('active');
         }
 
-        // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း
+        // 🆕 API Keys များကို တစ်ခုချင်းစီ ခွဲပြီး သိမ်းဆည်းပေးမည့် လုပ်ဆောင်ချက်အသစ်
+        async function saveSingleSetting(type) {
+            let tgToken = document.getElementById('storage-tg-token').value.trim();
+            let fbToken = document.getElementById('storage-fb-token').value.trim();
+            let fbVerify = document.getElementById('storage-fb-verify').value.trim();
+
+            if (type === 'tg') {
+                localStorage.setItem('TG_TOKEN', tgToken);
+                // Facebook keys များကို အလွတ်မဖြစ်သွားစေရန် server သို့ လက်ရှိတန်ဖိုးများအတိုင်း ပြန်တွဲပို့ပေးပါမည်
+            } else if (type === 'fb') {
+                localStorage.setItem('FB_TOKEN', fbToken);
+                localStorage.setItem('FB_VERIFY', fbVerify);
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/save-config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tgToken, fbToken, fbVerify })
+                });
+                if(response.ok) {
+                    if (type === 'tg') {
+                        alert("✅ Telegram Bot Token ကို အောင်မြင်စွာ ချိတ်ဆက်သိမ်းဆည်းပြီးပါပြီဗျာ!");
+                    } else {
+                        alert("✅ Facebook Messenger Settings များကို အောင်မြင်စွာ ချိတ်ဆက်သိမ်းဆည်းပြီးပါပြီဗျာ!");
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Server သို့ ချိတ်ဆက်ရန် အခက်အခဲရှိနေသော်လည်း Browser တွင် မှတ်သားထားပြီးဖြစ်သည်။");
+            }
+        }
+
+        // 💾 Settings များအား local နှင့် Live Server ဆီ တိုက်ရိုက်ပို့သိမ်းခြင်း (အဟောင်း - ခလုတ်ဖျက်လိုက်သော်လည်း logic သဘောအရ ထားရှိပါသည်)
         async function saveSettingsToLocal() {
             let tgToken = document.getElementById('storage-tg-token').value.trim();
             let fbToken = document.getElementById('storage-fb-token').value.trim();
@@ -239,6 +286,33 @@
             
             // Server က ဒေတာတွေကို ချက်ချင်း စတင်ဆွဲယူခိုင်းခြင်း
             fetchLiveUpdates();
+
+            // 🆕 Chatbox ထဲက ပုံတွေကို ထောက်ပြီး နှိပ်လိုက်ရင် ပုံကြီးပွင့်လာစေမည့် Event Listener စနစ်
+            document.getElementById('chat-stream').addEventListener('click', function(e) {
+                if (e.target && e.target.tagName === 'IMG') {
+                    openImageZoomModal(e.target.src);
+                }
+            });
+
+            // 🆕 ပုံကြီးပွင့်နေချိန် နောက်ခံအမည်းရောင်နေရာကို နှိပ်လိုက်လျှင် ပြန်ပိတ်ပေးမည့် စနစ်
+            document.getElementById('zoom-img-modal').addEventListener('click', function(e) {
+                if (e.target.id === 'zoom-img-modal') {
+                    closeImageZoomModal();
+                }
+            });
+        }
+
+        // 🆕 Image Zoom Modal ဖွင့်ရန် Function
+        function openImageZoomModal(imgSrc) {
+            const modal = document.getElementById('zoom-img-modal');
+            const modalImg = document.getElementById('zoom-target-src');
+            modal.style.display = "block";
+            modalImg.src = imgSrc;
+        }
+
+        // 🆕 Image Zoom Modal ပိတ်ရန် Function
+        function closeImageZoomModal() {
+            document.getElementById('zoom-img-modal').style.display = "none";
         }
 
         // 🔄 ၃ စက္ကန့်တစ်ကြိမ် Server ထံမှ စာဝင်/စာထွက်များကို ပုံမှန်ဆွဲယူမည့် နှလုံးခုန်စနစ် (Polling)
@@ -353,8 +427,9 @@
                 // လင့်ခ်သည် ပုံလင့်ခ်ဖြစ်နေပါက <img> tag ဖြင့် ပုံအဖြစ် တိုက်ရိုက်ပြသရန် စစ်ဆေးခြင်း
                 const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
                 
+                // 🆕 ပုံကြီးချဲ့စနစ်နှင့် ချိတ်ဆက်နိုင်ရန် window.open နေရာတွင် သတ်မှတ်ချက်ကို ဖယ်ထုတ်ပြီး IMG များကို တိုက်ရိုက် render လုပ်ထားပါသည်
                 let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;" onclick="window.open('${log.text}', '_blank')"/>`
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
                     : log.text;
 
                 html += `<div class="message-wrapper"><div class="message ${sideClass}">${renderContent}</div></div>`;
@@ -406,7 +481,7 @@
             }
         }
 
-        // စာအသစ်ဝင်လာပါက Noti တက်စေပြီး အသံမြည်စေသည့်စနစ်
+        // Сာအသစ်ဝင်လာပါက Noti တက်စေပြီး အသံမြည်စေသည့်စနစ်
         function checkNewIncomingNotification(logs) {
             if(logs.length > totalMessagesCount) {
                 let lastLog = logs[logs.length - 1];
