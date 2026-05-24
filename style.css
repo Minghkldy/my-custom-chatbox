@@ -2,22 +2,25 @@
 body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; overflow: hidden; }
 
 /* 1. ဘယ်ဘက်အစွန်းဆုံး ပင်မ Menu Bar */
-.main-sidebar { width: 70px; background-color: #080d16; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; border-right: 1px solid #1f2937; }
+.main-sidebar { width: 70px; background-color: #080d16; display: flex; flex-direction: column; align-items: center; padding-top: 20px; gap: 20px; border-right: 1px solid #1f2937; flex-shrink: 0; }
 .menu-icon { width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 20px; color: #9ca3af; transition: 0.2s; }
 .menu-icon:hover, .menu-icon.active { background-color: #1e293b; color: #3b82f6; }
 
 /* Main App Content Wrapper */
-.app-container { flex: 1; display: flex; position: relative; }
-.page { display: none; width: 100%; height: 100%; }
-.page.active { display: flex; }
+.app-container { flex: 1; display: flex; position: relative; overflow: hidden; }
+.page { display: none !important; width: 100%; height: 100%; overflow: hidden; }
+.page.active { display: flex !important; }
+
+/* Placeholder များ မျက်နှာပြင် အပြည့် ဖြစ်စေရန် */
+#broadcast-placeholder, #settings-placeholder { width: 100%; height: 100%; display: flex; overflow: hidden; }
 
 /* 2. INBOX PAGE - User List */
-.user-sidebar { width: 320px; background-color: #111827; border-right: 1px solid #1f2937; display: flex; flex-direction: column; }
+.user-sidebar { width: 320px; background-color: #111827; border-right: 1px solid #1f2937; display: flex; flex-direction: column; flex-shrink: 0; }
 .sidebar-header { padding: 15px; border-bottom: 1px solid #1f2937; font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
 .user-list { flex: 1; overflow-y: auto; }
 .user-item { display: flex; align-items: center; padding: 15px; border-bottom: 1px solid #1f2937; cursor: pointer; transition: 0.2s; gap: 12px; }
 .user-item:hover, .user-item.active { background-color: #1f2937; }
-.avatar { width: 40px; height: 40px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 16px; text-transform: uppercase; }
+.avatar { width: 40px; height: 40px; background-color: #4b5563; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; position: relative; font-size: 16px; text-transform: uppercase; flex-shrink: 0; }
 .platform-badge { position: absolute; bottom: -2px; right: -2px; width: 16px; height: 16px; border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; color: white; }
 .badge-tg { background-color: #0088cc; }
 .badge-msg { background-color: #006aff; }
@@ -27,19 +30,19 @@ body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; 
 .last-msg { font-size: 12px; color: #9ca3af; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* 3. INBOX PAGE - Middle Chat Area */
-.chat-area { flex: 1; display: flex; flex-direction: column; background-color: #0f172a; }
-.chat-header { height: 60px; background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; align-items: center; padding: 0 20px; font-weight: bold; justify-content: space-between; }
+.chat-area { flex: 1; display: flex; flex-direction: column; background-color: #0f172a; overflow: hidden; }
+.chat-header { height: 60px; background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; align-items: center; padding: 0 20px; font-weight: bold; justify-content: space-between; flex-shrink: 0; }
 .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
 .message-wrapper { display: flex; flex-direction: column; width: 100%; }
 .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; word-break: break-word; }
 .message.incoming { background-color: #1e293b; color: #f3f4f6; align-self: flex-start; border-bottom-left-radius: 2px; }
 .message.outgoing { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-.chat-input-container { padding: 15px 20px; background-color: #111827; border-top: 1px solid #1f2937; display: flex; gap: 12px; align-items: center; }
+.chat-input-container { padding: 15px 20px; background-color: #111827; border-top: 1px solid #1f2937; display: flex; gap: 12px; align-items: center; flex-shrink: 0; }
 .chat-input-container input { flex: 1; background-color: #1f2937; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; }
 .chat-input-container button { background-color: #2563eb; color: white; border: none; padding: 12px 24px; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
 /* 4. INBOX PAGE - Right Sidebar */
-.details-sidebar { width: 300px; background-color: #111827; border-left: 1px solid #1f2937; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow-y: auto; }
+.details-sidebar { width: 300px; background-color: #111827; border-left: 1px solid #1f2937; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; overflow-y: auto; flex-shrink: 0; }
 .details-avatar { width: 80px; height: 80px; background-color: #374151; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: bold; text-transform: uppercase; }
 .details-name-box { display: flex; align-items: center; gap: 8px; }
 .details-name { font-size: 18px; font-weight: bold; }
@@ -50,13 +53,13 @@ body { display: flex; height: 100vh; background-color: #0b111e; color: #e5e7eb; 
 .info-label { color: #9ca3af; }
 
 /* SETTINGS & BROADCAST VIEWS */
-.panel-view { padding: 40px; display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; }
-.form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+.panel-view { padding: 40px; display: flex; flex-direction: column; gap: 20px; width: 100%; max-width: 700px; margin: 0 auto; overflow-y: auto; height: 100%; }
+.form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; width: 100%; }
 .form-group label { font-size: 14px; font-weight: bold; color: #9ca3af; }
 .form-group input, .form-group select, .form-group textarea { background-color: #111827; border: 1px solid #374151; padding: 12px; border-radius: 6px; color: white; outline: none; width: 100%; }
 .form-group textarea { height: 120px; resize: none; }
-.btn-primary { background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; }
-.btn-danger { background-color: #dc2626; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-primary { background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
+.btn-danger { background-color: #dc2626; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; }
 
 /* NOTIFICATION TOAST */
 .noti-toast { position: fixed; top: 20px; right: 20px; background-color: #1e293b; border-left: 4px solid #3b82f6; padding: 15px 25px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); display: none; gap: 10px; align-items: center; z-index: 9999; animation: slideIn 0.3s ease; }
