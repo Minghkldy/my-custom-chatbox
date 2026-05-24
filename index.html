@@ -146,33 +146,12 @@
             </div>
         </div>
 
-        <div id="bc-tab" class="page">
-            <div class="panel-view">
-                <h2>📢 Send Broadcast Message</h2>
-                <div class="form-group">
-                    <label>Target Audience</label>
-                    <select id="bc-platform">
-                        <option>Telegram & Messenger Users All</option>
-                        <option>Telegram Users Only</option>
-                        <option>Messenger Users Only</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Photo URL (Optional)</label>
-                    <input type="text" id="bc-image-url" placeholder="ဥပမာ- https://example.com/image.jpg (ပုံလင့်ခ်ထည့်ရန်)">
-                </div>
-                <div class="form-group">
-                    <label>Message Content</label>
-                    <textarea id="bc-text" placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့်စာကို ဒီမှာရေးပါ..."></textarea>
-                </div>
-                <button class="btn-danger" onclick="executeBroadcast()">Send Broadcast Now 🚀</button>
-            </div>
-        </div>
+        <div id="broadcast-placeholder" style="width: 100%; height: 100%;"></div>
 
         <div id="settings-tab" class="page">
             <div class="panel-view">
                 <h2>⚙️ Channels Connection Settings</h2>
-                <p style="color: #9ca3af; font-size: 14px; margin-bottom: 10px;">Telegram Token များနှင့် Messenger API များကို Website Dashboard ပေါ်မှ တိုက်ရိုက် ဆက်သွယ်ချိတ်ဆက်ရန်နေရာ ဖြစ်သည်။</p>
+                <p style="color: #9ca3af; font-size: 14px; margin-bottom: 10px;">Telegram Token များနှင့် Messenger API များကို Website Dashboard ပေါ်မှ တိုက်ရိုက် ဆက်သွယ်ချက်ဆက်ရန်နေရာ ဖြစ်သည်။</p>
                 
                 <hr style="border: 0; border-top: 1px solid #1f2937; margin-bottom: 15px;">
 
@@ -278,12 +257,20 @@
             }
         }
 
-        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
+        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်နှင့် broadcast.html အား ဆွဲခေါ်ရန်
         window.onload = function() {
             if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
             if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
             if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
             
+            // 🔄 Broadcast HTML ဖိုင်အား Dynamic Fetch လုပ်ပြီး လှမ်းထည့်ခြင်း
+            fetch('broadcast.html')
+                .then(response => response.text())
+                .then(htmlData => {
+                    document.getElementById('broadcast-placeholder').innerHTML = htmlData;
+                })
+                .catch(err => console.error("Broadcast ဖိုင်ဆွဲယူရာတွင် အမှားရှိသည် - ", err));
+
             // Server က ဒေတာတွေကို ချက်ချင်း စတင်ဆွဲယူခိုင်းခြင်း
             fetchLiveUpdates();
 
@@ -552,7 +539,7 @@
             const imageUrl = document.getElementById('bc-image-url').value.trim();
 
             if (!text && !imageUrl) {
-                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ။");
+                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ।");
                 return;
             }
 
