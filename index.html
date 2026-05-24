@@ -15,20 +15,33 @@
         .sidebar ul li { padding: 12px; margin-bottom: 10px; background: #374151; border-radius: 6px; cursor: pointer; }
         .sidebar ul li.active { background: #2563eb; }
 
-        /* Main Chat Area အပြင်အဆင် */
-        .chat-container { flex: 1; display: flex; flex-direction: column; }
+        /* Main Content Container */
+        .main-content { flex: 1; display: flex; flex-direction: column; }
+        
+        /* Pages */
+        .page { display: none; flex-direction: column; flex: 1; }
+        .page.active { display: flex; }
+
         .chat-header { background: white; padding: 20px; border-bottom: 1px solid #e5e7eb; font-weight: bold; }
         
-        /* Message ပြသမည့်နေရာ */
+        /* Message Area */
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         .message { padding: 10px 15px; border-radius: 8px; max-width: 60%; }
         .message.incoming { background: white; align-self: flex-start; border: 1px solid #e5e7eb; }
         .message.outgoing { background: #2563eb; color: white; align-self: flex-end; }
 
-        /* Input Area (ရိုက်ပြီး ပို့မည့်နေရာ) */
+        /* Input Area */
         .chat-input-area { background: white; padding: 15px; border-top: 1px solid #e5e7eb; display: flex; gap: 10px; }
         .chat-input-area input { flex: 1; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; outline: none; }
         .chat-input-area button { background: #2563eb; color: white; border: none; padding: 0 20px; border-radius: 6px; cursor: pointer; }
+
+        /* Broadcast Page CSS */
+        .broadcast-container { padding: 30px; max-width: 600px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: bold; }
+        .form-group textarea { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; height: 120px; resize: none; outline: none; }
+        .form-group select { width: 100%; padding: 12px; border: 1px solid #e5e7eb; border-radius: 6px; }
+        .btn-broadcast { background: #dc2626; color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -36,28 +49,84 @@
     <div class="sidebar">
         <h2>My Chatbox</h2>
         <ul>
-            <li class="active">📥 All Inboxes</li>
-            <li>📢 Broadcast (ပို့ရန်)</li>
-            <li>⚙️ Settings</li>
+            <li id="menu-inbox" class="active" onclick="switchPage('inbox-page', 'menu-inbox')">📥 All Inboxes</li>
+            <li id="menu-broadcast" onclick="switchPage('broadcast-page', 'menu-broadcast')">📢 Broadcast (ပို့ရန်)</li>
         </ul>
     </div>
 
-    <div class="chat-container">
-        <div class="chat-header">
-            💬 Telegram & Messenger Messages
-        </div>
+    <div class="main-content">
         
-        <div class="chat-messages">
-            <div class="message incoming">ဟယ်လို! Telegram ကနေ ဆက်သွယ်လိုက်တာပါဗျာ။</div>
-            <div class="message outgoing">ဟုတ်ကဲ့ မင်္ဂလာပါခင်ဗျာ။ ဘာကူညီပေးရမလဲ။</div>
-            <div class="message incoming">ဒါက Messenger က ဝင်လာတဲ့ မက်ဆေ့ခ်ျ ဖြစ်ပါတယ်။</div>
+        <div id="inbox-page" class="page active">
+            <div class="chat-header">💬 Telegram & Messenger Messages</div>
+            <div class="chat-messages" id="chat-box">
+                <div class="message incoming">ဟယ်လို! Telegram ကနေ ဆက်သွယ်လိုက်တာပါဗျာ။</div>
+                <div class="message outgoing">ဟုတ်ကဲ့ မင်္ဂလာပါခင်ဗျာ။ ဘာကူညီပေးရမလဲ။</div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="msg-input" placeholder="ဒီနေရာမှာ စာရိုက်ပါ...">
+                <button onclick="sendMessage()">Send</button>
+            </div>
         </div>
 
-        <div class="chat-input-area">
-            <input type="text" placeholder="ဒီနေရာမှာ စာရိုက်ပါ...">
-            <button>Send</button>
+        <div id="broadcast-page" class="page">
+            <div class="chat-header">📢 Send Broadcast Message</div>
+            <div class="broadcast-container">
+                <div class="form-group">
+                    <label>ဘယ်သူတွေဆီ ပို့မလဲ (Target Platform)</label>
+                    <select id="broadcast-platform">
+                        <option value="all">Telegram & Messenger အားလုံး</option>
+                        <option value="telegram">Telegram Users သီးသန့်</option>
+                        <option value="messenger">Messenger Users သီးသန့်</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>မက်ဆေ့ခ်ျ ရေးရန်</label>
+                    <textarea id="broadcast-text" placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့် စာသားကို ဒီမှာ ရေးပါ..."></textarea>
+                </div>
+                <button class="btn-broadcast" onclick="sendBroadcast()">Send Broadcast Now 🚀</button>
+            </div>
         </div>
+
     </div>
 
+    <script>
+        // စာမျက်နှာအကူးအပြောင်း လုပ်ရန် Function
+        function switchPage(pageId, menuId) {
+            // Page အားလုံးကို ဖျောက်ပါ
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            // Active ဖြစ်မယ့် Page ကို ပြပါ
+            document.getElementById(pageId).classList.add('active');
+
+            // Menu အရောင်ပြောင်းရန်
+            document.querySelectorAll('.sidebar ul li').forEach(m => m.classList.remove('active'));
+            document.getElementById(menuId).classList.add('active');
+        }
+
+        // Chat Box ထဲ စာရိုက်ပြီး Send နှိပ်ရင် ချက်ချင်း ပေါ်လာစေရန်
+        function sendMessage() {
+            let input = document.getElementById('msg-input');
+            let text = input.value.trim();
+            if(text === "") return;
+
+            let chatBox = document.getElementById('chat-box');
+            let newMsg = document.getElementById('chat-box');
+            
+            // Outgoing Message အသစ်ထည့်ခြင်း
+            chatBox.innerHTML += `<div class="message outgoing">${text}</div>`;
+            input.value = ""; // စာသားကွက်လပ်ကို ရှင်းထုတ်ရန်
+            chatBox.scrollTop = chatBox.scrollHeight; // အောက်ဆုံးသို့ ဆွဲချရန်
+        }
+
+        // Broadcast ပို့သည့် လုပ်ဆောင်ချက် (လောလောဆယ် Alert ပြထားမည်)
+        function sendBroadcast() {
+            let text = document.getElementById('broadcast-text').value;
+            let platform = document.getElementById('broadcast-platform').value;
+            if(text.trim() === "") {
+                alert("ကျေးဇူးပြု၍ မက်ဆေ့ခ်ျ ရေးပေးပါဦး!");
+                return;
+            }
+            alert(`စနစ်ပြင်ဆင်နေဆဲဖြစ်သည်! \nPlatform: ${platform} \nMessage: ${text}`);
+        }
+    </script>
 </body>
 </html>
