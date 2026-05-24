@@ -1,0 +1,22 @@
+<div id="bc-tab" class="page">
+    <div class="panel-view">
+        <h2>📢 Send Broadcast Message</h2>
+        <div class="form-group">
+            <label>Target Audience</label>
+            <select id="bc-platform">
+                <option>Telegram & Messenger Users All</option>
+                <option>Telegram Users Only</option>
+                <option>Messenger Users Only</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Photo URL (Optional)</label>
+            <input type="text" id="bc-image-url" placeholder="ဥပမာ- https://example.com/image.jpg (ပုံလင့်ခ်ထည့်ရန်)">
+        </div>
+        <div class="form-group">
+            <label>Message Content</label>
+            <textarea id="bc-text" placeholder="လူအားလုံးဆီ တစ်ပြိုင်နက် ပို့မယ့်စာကို ဒီမှာရေးပါ..."></textarea>
+        </div>
+        <button class="btn-danger" onclick="executeBroadcast()">Send Broadcast Now 🚀</button>
+    </div>
+</div>
