@@ -18,68 +18,72 @@
         </div>
     </div>
 
-    <div class="main-sidebar">
-        <div class="menu-icon active" id="ico-inbox" onclick="showTab('inbox-tab', 'ico-inbox')" title="Inbox">📥</div>
-        <div class="menu-icon" id="ico-bc" onclick="showTab('bc-tab', 'ico-bc')" title="Broadcast">📢</div>
-        <div class="menu-icon" id="ico-settings" onclick="showTab('settings-tab', 'ico-settings')" title="Channels Connection Settings">⚙️</div>
-    </div>
+    <div class="app-layout">
 
-    <div class="app-container">
-        
-        <div id="inbox-tab" class="page active">
-            <div class="user-sidebar">
-                <div class="sidebar-header">
-                    <span>Inbox Conversations</span>
-                    <button onclick="triggerDemoNotification()" style="font-size: 11px; background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Noti Test 🔔</button>
-                </div>
-                <div class="user-list" id="users-container">
-                    <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>
-                </div>
-            </div>
-
-            <div class="chat-area">
-                <div class="chat-header">
-                    <span id="active-chat-title">💬 Please select a conversation</span>
-                </div>
-                <div class="chat-messages" id="chat-stream">
-                    <p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျများကို ဖတ်ရှုရန် လူတစ်ဦးအား ရွေးချယ်ပေးပါ</p>
-                </div>
-                <div class="chat-input-container">
-                    <label for="chat-image-file" style="cursor: pointer; font-size: 20px; color: #9ca3af; user-select: none; transition: 0.2s;" title="Upload Photo">📎</label>
-                    <input type="file" id="chat-image-file" accept="image/*" style="display: none;" onchange="uploadAndSendChatImage(this)">
-                    
-                    <input type="text" id="chat-field" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') pushMessage()">
-                    <button onclick="pushMessage()">Send</button>
-                </div>
-            </div>
-
-            <div class="details-sidebar">
-                <div class="details-avatar" id="det-av">?</div>
-                <div class="details-name-box">
-                    <div class="details-name" id="det-name">-</div>
-                    <button class="btn-edit-name" onclick="editCurrentUserName()" title="Edit Name">✏️ ပြင်ရန်</button>
-                </div>
-                
-                <div class="info-card">
-                    <div class="info-row"><span class="info-label">Contact ID</span><span id="det-id">-</span></div>
-                    <div class="info-row"><span class="info-label">Platform</span><span id="det-plat">-</span></div>
-                    <div class="info-row"><span class="info-label">Gender</span><span id="det-gen">-</span></div>
-                </div>
-
-                <div style="width: 100%; text-align: left;">
-                    <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #9ca3af;">Tags</div>
-                    <div style="display: inline-block; background-color: #374151; color: #3b82f6; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">Customer</div>
-                </div>
-            </div>
+        <div class="main-sidebar">
+            <div class="menu-icon active" id="ico-inbox" onclick="showTab('inbox-tab', 'ico-inbox')" title="Inbox">📥</div>
+            <div class="menu-icon" id="ico-bc" onclick="showTab('bc-tab', 'ico-bc')" title="Broadcast">📢</div>
+            <div class="menu-icon" id="ico-settings" onclick="showTab('settings-tab', 'ico-settings')" title="Channels Connection Settings">⚙️</div>
         </div>
 
-        <div id="broadcast-placeholder" style="width: 100%; height: 100%;"></div>
+        <div class="app-container">
+            
+            <div id="inbox-tab" class="page active">
+                
+                <div class="user-sidebar">
+                    <div class="sidebar-header">
+                        <span>Inbox Conversations</span>
+                        <button onclick="triggerDemoNotification()" style="font-size: 11px; background: #1f2937; border: 1px solid #374151; color: #9ca3af; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Noti Test 🔔</button>
+                    </div>
+                    <div class="user-list" id="users-container">
+                        <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>
+                    </div>
+                </div>
 
-        <div id="settings-placeholder" style="width: 100%; height: 100%;"></div>
+                <div class="chat-area">
+                    <div class="chat-header">
+                        <span id="active-chat-title">💬 Please select a conversation</span>
+                    </div>
+                    <div class="chat-messages" id="chat-stream">
+                        <p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျများကို ဖတ်ရှုရန် လူတစ်ဦးအား ရွေးချယ်ပေးပါ</p>
+                    </div>
+                    <div class="chat-input-container">
+                        <label for="chat-image-file" style="cursor: pointer; font-size: 20px; color: #9ca3af; user-select: none; transition: 0.2s;" title="Upload Photo">📎</label>
+                        <input type="file" id="chat-image-file" accept="image/*" style="display: none;" onchange="uploadAndSendChatImage(this)">
+                        
+                        <input type="text" id="chat-field" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') pushMessage()">
+                        <button onclick="pushMessage()">Send</button>
+                    </div>
+                </div>
 
-    </div>
+                <div class="details-sidebar">
+                    <div class="details-avatar" id="det-av">?</div>
+                    <div class="details-name-box">
+                        <div class="details-name" id="det-name">-</div>
+                        <button class="btn-edit-name" onclick="editCurrentUserName()" title="Edit Name">✏️ ပြင်ရန်</button>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-row"><span class="info-label">Contact ID</span><span id="det-id">-</span></div>
+                        <div class="info-row"><span class="info-label">Platform</span><span id="det-plat">-</span></div>
+                        <div class="info-row"><span class="info-label">Gender</span><span id="det-gen">-</span></div>
+                    </div>
 
-    <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
+                    <div style="width: 100%; text-align: left;">
+                        <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px; color: #9ca3af;">Tags</div>
+                        <div style="display: inline-block; background-color: #374151; color: #3b82f6; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: bold;">Customer</div>
+                    </div>
+                </div>
+
+            </div> <div id="bc-tab" class="page">
+                <div id="broadcast-placeholder" style="width: 100%; height: 100%;"></div>
+            </div>
+
+            <div id="settings-tab" class="page">
+                <div id="settings-placeholder" style="width: 100%; height: 100%;"></div>
+            </div>
+
+        </div> </div> <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
         <span class="zoom-close-btn" onclick="closeImageZoomModal()">&times;</span>
         <img class="zoom-modal-content" id="zoom-target-src">
     </div>
@@ -162,7 +166,7 @@
             }
         }
 
-        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်နှင့် သီးသန့်ဖိုင်များကို ဆွဲခေါ်ရန်
+        // Сာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်နှင့် သီးသန့်ဖိုင်များကို ဆွဲခေါ်ရန်
         window.onload = function() {
             // 🔄 Broadcast HTML ဖိုင်အား Dynamic Fetch လုပ်ပြီး လှမ်းထည့်ခြင်း
             fetch('broadcast.html')
@@ -333,7 +337,7 @@
                 
                 // 🆕 ပုံကြီးချဲ့စနစ်နှင့် ချိတ်ဆက်နိုင်ရန် window.open နေရာတွင် သတ်မှတ်ချက်ကို ဖယ်ထုတ်ပြီး IMG များကို တိုက်ရိုက် render လုပ်ထားပါသည်
                 let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0 haste;"/>`
                     : log.text;
 
                 html += `<div class="message-wrapper"><div class="message ${sideClass}">${renderContent}</div></div>`;
@@ -456,7 +460,7 @@
             const imageUrl = document.getElementById('bc-image-url') ? document.getElementById('bc-image-url').value.trim() : '';
 
             if (!text && !imageUrl) {
-                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ။");
+                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ।");
                 return;
             }
 
