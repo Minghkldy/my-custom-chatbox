@@ -422,8 +422,7 @@
                     renderChatStream(data.logs);
                 });
         }
-
-        // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ အစီအစဉ်တကျ ပြသခြင်း
+        // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ အစီအစဉ်တကျ ပြသခြင်း (🕒 အချိန်စနစ် ထည့်သွင်းထားသည်)
         function renderChatStream(logs) {
             if(!currentActiveUserId) return;
             
@@ -440,11 +439,28 @@
                 let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
                 const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
                 
+                // 🕒 ၁။ စာဝင်/စာထွက်ချိန်ကို HH:MM AM/PM ပုံစံဖြင့် တွက်ချက်ခြင်း (စနစ်ထဲတွင် အချိန်မပါလာပါက လက်ရှိအချိန်ကို ပြပေးမည်)
+                let timeString = "";
+                if (log.time) {
+                    timeString = log.time; // Server က အချိန်ပေးရင် သုံးမည်
+                } else {
+                    const now = new Date();
+                    timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+                
                 let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0行業;"/>`
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
                     : log.text;
 
-                html += `<div class="message-wrapper"><div class="message ${sideClass}">${renderContent}</div></div>`;
+                // ညှပ်ထည့်ချက် - စာသား သို့မဟုတ် ပုံ၏ အောက်ခြေတွင် အချိန်ပြသပေးမည့် msg-time စာတန်းကို ထည့်သွင်းထားပါသည်
+                html += `
+                    <div class="message-wrapper">
+                        <div class="message ${sideClass}" style="display: flex; flex-direction: column; gap: 4px;">
+                            <div class="message-content">${renderContent}</div>
+                            <span class="msg-time" style="font-size: 10px; color: #a0aec0; align-self: flex-end; margin-top: 2px; font-weight: normal;">${timeString}</span>
+                        </div>
+                    </div>
+                `;
             });
             
             let isScrollAtBottom = stream.scrollHeight - stream.clientHeight <= stream.scrollTop + 100;
@@ -528,7 +544,7 @@
             }
         }
 
-        // စာရိုက်ပြီး Send နှိပ်လျှင် ထွက်သွားစေမည့်စနစ်
+       // စာရိုက်ပြီး Send နှိပ်လျှင် ထွက်သွားစေမည့်စနစ် (🕒 အချိန်စနစ် ထည့်သွင်းထားသည်)
         async function pushMessage() {
             let input = document.getElementById('chat-field');
             let text = input.value.trim();
@@ -537,8 +553,22 @@
             let platform = document.getElementById('det-plat').innerText;
             let userId = document.getElementById('det-id').innerText;
 
+            // 🕒 စာပို့လိုက်သည့် လက်ရှိအချိန်ကို ရယူခြင်း
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
             let stream = document.getElementById('chat-stream');
-            stream.innerHTML += `<div class="message-wrapper"><div class="message outgoing">${text}</div></div>`;
+            
+            // စာပို့လိုက်လျှင် အောက်ခြေတွင် အချိန်ပါ တစ်ခါတည်း ပြသပေးခြင်း
+            stream.innerHTML += `
+                <div class="message-wrapper">
+                    <div class="message outgoing" style="display: flex; flex-direction: column; gap: 4px;">
+                        <div class="message-content">${text}</div>
+                        <span class="msg-time" style="font-size: 10px; color: #e0e7ff; align-self: flex-end; margin-top: 2px; font-weight: normal; opacity: 0.8;">${timeString}</span>
+                    </div>
+                </div>
+            `;
+            
             input.value = "";
             stream.scrollTop = stream.scrollHeight;
 
