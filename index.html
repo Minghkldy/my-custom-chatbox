@@ -575,15 +575,25 @@
             }
         }
 
-        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန်
-        function triggerDemoNotification() {
-            document.getElementById('noti-sound').play();
-            let notiBox = document.getElementById('notification-box');
-            document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
-            document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
-            notiBox.style.display = "flex";
-            setTimeout(() => notiBox.style.display = "none", 4000);
-        }
+        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် (စနစ်တကျ ပြင်ဆင်ပြီး)
+function triggerDemoNotification() {
+    const sound = document.getElementById('noti-sound');
+    if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(error => {
+            console.log("Browser blocked autoplay, waiting for click...");
+            document.body.addEventListener('click', () => { sound.play(); }, { once: true });
+        });
+    }
+
+    let notiBox = document.getElementById('notification-box');
+    document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
+    document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
+    notiBox.style.display = "flex";
+    
+    // ⚠️ Fix: setTimeout syntax အမှန်ပြင်ထားသည် (comma မဟုတ်ဘဲ bracket အပိတ်မှန်ရန်)
+    setTimeout(() => { notiBox.style.display = "none"; }, 4000);
+}
     </script>
 </body>
 </html>
