@@ -61,15 +61,15 @@ app.post('/api/send-message', async (req, res) => {
     if (user) {
         user.unread = 0;
         // ပုံလင့်ခ်ဖြစ်နေရင် အစမ်းကြည့်စာသားကို 📷 Photo လို့ ပြောင်းပြပါမည်
-        user.lastMsg = text.startsWith('http') && (text.match(/\.(jpeg|jpg|gif|png)$/) || text.includes('file/bot')) ? '📷 Photo' : text;
+        user.lastMsg = text.startsWith('http') && (text.match(/\.(jpeg|jpg|gif|png)$/) || text.includes('file/bot') || text.includes('api.imgbb.com')) ? '📷 Photo' : text;
         user.time = 'Just Now';
         userList = [user, ...userList.filter(u => u.id != userId)];
     }
 
+    // 1. Telegram သို့ စာ/ပုံ ပို့ခြင်း
     if (platform === 'Telegram' && configStorage.tgToken) {
         try {
-            // လင့်ခ်က ပုံလင့်ခ်ဖြစ်နေရင် sendPhoto API ကို သုံးပြီး ပုံအဖြစ် ထွက်သွားအောင် လုပ်ခြင်း
-            const isPhoto = text.startsWith('http') && (text.match(/\.(jpeg|jpg|gif|png)$/) || text.includes('file/bot'));
+            const isPhoto = text.startsWith('http') && (text.match(/\.(jpeg|jpg|gif|png)$/) || text.includes('file/bot') || text.includes('api.imgbb.com'));
             
             if (isPhoto) {
                 await axios.post(`https://api.telegram.org/bot${configStorage.tgToken}/sendPhoto`, {
@@ -86,6 +86,32 @@ app.post('/api/send-message', async (req, res) => {
             console.error('❌ Telegram သို့ စာပို့မရပါ:', err.message);
         }
     }
+
+    // 2. Facebook Messenger သို့ စာ/ပုံ ပို့ခြင်း (ဖြည့်စွက်ပြင်ဆင်ထားသော ကုဒ်)
+    if ((platform === 'Messenger' || platform === 'Facebook') && configStorage.fbToken) {
+        try {
+            const isPhoto = text.startsWith('http') && (text.match(/\.(jpeg|jpg|gif|png)$/) || text.includes('api.imgbb.com'));
+            let messagePayload = { text: text };
+
+            if (isPhoto) {
+                messagePayload = {
+                    attachment: {
+                        type: "image",
+                        payload: { url: text, is_reusable: true }
+                    }
+                };
+            }
+
+            await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${configStorage.fbToken}`, {
+                recipient: { id: userId },
+                message: messagePayload
+            });
+            console.log(`🟢 FB User ${userId} ထံသို့ စာ/ပုံ ပို့ဆောင်မှု အောင်မြင်သည်`);
+        } catch (err) {
+            console.error('❌ Facebook Messenger သို့ စာပို့မရပါ:', err.response ? err.response.data : err.message);
+        }
+    }
+
     res.sendStatus(200);
 });
 
@@ -98,22 +124,44 @@ app.post('/api/broadcast', async (req, res) => {
 
     // လူတိုင်းဆီ Loop ပတ်ပြီး တစ်ယောက်ချင်းစီ လိုက်ပို့ပေးခြင်း
     for (const user of userList) {
+        // --- Telegram User ဖြစ်လျှင် ---
         if (user.platform === 'Telegram' && configStorage.tgToken) {
             try {
-                // ၁။ ပုံပါလာလျှင် ပုံအရင်ပို့မည်
                 if (imageUrl) {
                     messageLogs.push({ userId: user.id, text: imageUrl, sender: 'admin', timestamp: new Date() });
                     await axios.post(`https://api.telegram.org/bot${configStorage.tgToken}/sendPhoto`, { chat_id: user.id, photo: imageUrl });
                 }
-                // ၂။ စာသားပါလာလျှင် စာသား ဆက်ပို့မည်
                 if (text) {
                     messageLogs.push({ userId: user.id, text: text, sender: 'admin', timestamp: new Date() });
                     await axios.post(`https://api.telegram.org/bot${configStorage.tgToken}/sendMessage`, { chat_id: user.id, text: text });
                 }
             } catch (err) {
-                console.error(`❌ Broadcast ပို့မရပါ (User: ${user.id}):`, err.message);
+                console.error(`❌ TG Broadcast ပို့မရပါ (User: ${user.id}):`, err.message);
             }
         }
+
+        // --- Messenger User ဖြစ်လျှင် (ဖြည့်စွက်ပြင်ဆင်ထားသော ကုဒ်) ---
+        if ((user.platform === 'Messenger' || user.platform === 'Facebook') && configStorage.fbToken) {
+            try {
+                if (imageUrl) {
+                    messageLogs.push({ userId: user.id, text: imageUrl, sender: 'admin', timestamp: new Date() });
+                    await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${configStorage.fbToken}`, {
+                        recipient: { id: user.id },
+                        message: { attachment: { type: "image", payload: { url: imageUrl, is_reusable: true } } }
+                    });
+                }
+                if (text) {
+                    messageLogs.push({ userId: user.id, text: text, sender: 'admin', timestamp: new Date() });
+                    await axios.post(`https://graph.facebook.com/v16.0/me/messages?access_token=${configStorage.fbToken}`, {
+                        recipient: { id: user.id },
+                        message: { text: text }
+                    });
+                }
+            } catch (err) {
+                console.error(`❌ FB Broadcast ပို့မရပါ (User: ${user.id}):`, err.response ? err.response.data : err.message);
+            }
+        }
+
         user.lastMsg = text ? text : '📷 Photo';
         user.time = 'Just Now';
     }
@@ -200,6 +248,7 @@ app.post('/webhook/messenger', (req, res) => {
     const body = req.body;
     if (body.object === 'page') {
         body.entry.forEach(entry => {
+            if (!entry.messaging) return;
             const webhookEvent = entry.messaging[0];
             if (webhookEvent && webhookEvent.message) {
                 const senderId = webhookEvent.sender.id;
