@@ -296,29 +296,19 @@
             
             fetchLiveUpdates();
 
-          document.body.addEventListener('click', function(e) {
+        document.body.addEventListener('click', function(e) {
     // ၁။ နှိပ်လိုက်တဲ့အရာက ပုံ (IMG) ဖြစ်ရမယ်
     if (e.target && e.target.tagName === 'IMG') {
         
-        // ၂။ အရေးကြီးဆုံးအချက် - အဲဒီပုံဟာ တကယ့် Chat Message ထဲက ပုံဖြစ်ရမယ်
-        // (အစ်ကို့ Chat Message တွေ ထွက်လာတဲ့ div ရဲ့ class က 'message-content' သို့မဟုတ် 'chat-message' ဖြစ်ဖို့များပါတယ်)
-        // ဒါကြောင့် အဲဒီ Chat Area ထဲက ပုံဟုတ်မဟုတ် အရင်စစ်ပါမယ်
-        const isChatMessage = e.target.closest('.message-content') || e.target.closest('.chat-message') || e.target.closest('.message');
-
-        if (isChatMessage) {
-            // တကယ့် Chat ထဲက ပုံဆိုရင် ပုံကြီးချဲ့မယ်!
-            openImageZoomModal(e.target.src);
-        } else {
-            // Chat ထဲက မဟုတ်ဘဲ Sidebar က Icon တွေ၊ Settings တွေဆိုရင် ဘာမှမလုပ်ဘဲ ကျော်သွားမယ်
+        // ၂။ အဲဒီပုံက ဘယ်ဘက်က Setting Icon တွေ၊ Sidebar ထဲကပုံတွေဆိုရင် Return ပြန်မယ် (မပွင့်စေရဘူး)
+        if (e.target.closest('.main-sidebar') || e.target.closest('.menu-icon') || e.target.closest('#ico-settings')) {
             return;
         }
+        
+        // ၃။ ကျန်တဲ့ Chat ထဲက ပုံမှန်သမျှကို ဝုန်းခနဲ ပွင့်စေမယ်!
+        openImageZoomModal(e.target.src);
     }
 });
-            document.getElementById('zoom-img-modal').addEventListener('click', function(e) {
-                if (e.target.id === 'zoom-img-modal') {
-                    closeImageZoomModal();
-                }
-            });
             
             // 🔍 ဤနေရာတွင် Search Bar စနစ်ကို တိုက်ရိုက် ညှပ်ထည့်ပါ
             const searchInput = document.getElementById('user-search-input');
