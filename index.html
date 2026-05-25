@@ -296,18 +296,24 @@
             
             fetchLiveUpdates();
 
-            // 🖼️ [ဒီနေရာကို အဓိကပြင်လိုက်တာပါ] Chat Stream ထဲက တကယ့် Message ပုံတွေကိုပဲ စစ်ထုတ်ပြီး အကြီးချဲ့မည့်စနစ်
-            document.getElementById('chat-stream').addEventListener('click', function(e) {
-                if (e.target && e.target.tagName === 'IMG') {
-                    // 🚀 အကယ်၍ နှိပ်လိုက်မိသည့်ပုံသည် Setting Group, Button သို့မဟုတ် h3 ခေါင်းစဉ်ထဲကပုံဖြစ်နေပါက လုံးဝ အကြီးမချဲ့ရန် ကျော်သွားမည်
-                    if (e.target.closest('button') || e.target.closest('.form-group') || e.target.closest('h3')) {
-                        return; 
-                    }
-                    // တကယ့် Chat Message ထဲက ပုံဆိုရင်တော့ ပုံကြီးချဲ့ပေးမည်
-                    openImageZoomModal(e.target.src);
-                }
-            });
+          document.body.addEventListener('click', function(e) {
+    // ၁။ နှိပ်လိုက်တဲ့အရာက ပုံ (IMG) ဖြစ်ရမယ်
+    if (e.target && e.target.tagName === 'IMG') {
+        
+        // ၂။ အရေးကြီးဆုံးအချက် - အဲဒီပုံဟာ တကယ့် Chat Message ထဲက ပုံဖြစ်ရမယ်
+        // (အစ်ကို့ Chat Message တွေ ထွက်လာတဲ့ div ရဲ့ class က 'message-content' သို့မဟုတ် 'chat-message' ဖြစ်ဖို့များပါတယ်)
+        // ဒါကြောင့် အဲဒီ Chat Area ထဲက ပုံဟုတ်မဟုတ် အရင်စစ်ပါမယ်
+        const isChatMessage = e.target.closest('.message-content') || e.target.closest('.chat-message') || e.target.closest('.message');
 
+        if (isChatMessage) {
+            // တကယ့် Chat ထဲက ပုံဆိုရင် ပုံကြီးချဲ့မယ်!
+            openImageZoomModal(e.target.src);
+        } else {
+            // Chat ထဲက မဟုတ်ဘဲ Sidebar က Icon တွေ၊ Settings တွေဆိုရင် ဘာမှမလုပ်ဘဲ ကျော်သွားမယ်
+            return;
+        }
+    }
+});
             document.getElementById('zoom-img-modal').addEventListener('click', function(e) {
                 if (e.target.id === 'zoom-img-modal') {
                     closeImageZoomModal();
