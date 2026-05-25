@@ -296,11 +296,11 @@
             
             fetchLiveUpdates();
 
-            // 🖼️ [အမှန်ပြင်ပြီး] Chat Stream ထဲက တကယ့် Message ပုံတွေကိုပဲ စစ်ထုတ်ပြီး အကြီးချဲ့မည့်စနစ်
+            // 🖼️ [ဒီနေရာကို အဓိကပြင်လိုက်တာပါ] Chat Stream ထဲက တကယ့် Message ပုံတွေကိုပဲ စစ်ထုတ်ပြီး အကြီးချဲ့မည့်စနစ်
             document.getElementById('chat-stream').addEventListener('click', function(e) {
                 if (e.target && e.target.tagName === 'IMG') {
                     // 🚀 အကယ်၍ နှိပ်လိုက်မိသည့်ပုံသည် Setting Group, Button သို့မဟုတ် h3 ခေါင်းစဉ်ထဲကပုံဖြစ်နေပါက လုံးဝ အကြီးမချဲ့ရန် ကျော်သွားမည်
-                    if (e.target.closest('button') || e.target.closest('.form-group') || e.target.closest('h3') || e.target.closest('.setting-icon') || e.target.closest('#setting-icon')) {
+                    if (e.target.closest('button') || e.target.closest('.form-group') || e.target.closest('h3')) {
                         return; 
                     }
                     // တကယ့် Chat Message ထဲက ပုံဆိုရင်တော့ ပုံကြီးချဲ့ပေးမည်
@@ -385,27 +385,24 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             }
         }
 
-        // 🆕 [ID အမှားပြင်ပြီး] Image Zoom Modal ဖွင့်ရန် Function
+        // 🆕 [ID ရော တည်နေရာပါ ညှိပြီး] Image Zoom Modal ဖွင့်ရန် Function
         function openImageZoomModal(imgSrc) {
             const modal = document.getElementById('zoom-img-modal');
-            
-            // HTML ထဲမှာ ID ဘယ်လိုပဲရှိရှိ အလုပ်လုပ်အောင် နှစ်မျိုးလုံးကို စစ်ထုတ်ပြီး ဖမ်းခိုင်းထားပါတယ်
             let modalImg = document.getElementById('zoom-target-src') || document.getElementById('zoom-img-content');
             
-            // အကယ်၍ အပေါ်က ID နှစ်ခုလုံး opacity သို့မဟုတ် ရှာမတွေ့ခဲ့ရင် HTML ထဲက မော်ဒယ်သေတ္တာထဲမှာ ရှိသမျှ <img> ကို အလိုအလျောက် လိုက်ရှာခိုင်းတဲ့စနစ်
             if (!modalImg && modal) {
                 modalImg = modal.querySelector('img'); 
             }
 
             if (modal && modalImg) {
                 modalImg.src = imgSrc;
-                modal.style.display = "flex"; // ပုံစံမပျက် ဗဟိုတည့်တည့်မှာ ပေါ်လာစေရန် flex သုံးထားပါတယ်
+                modal.style.display = "flex"; 
             } else if (modal) {
                 modal.style.display = "block";
             }
         }
 
-        // 🆕 Image Zoom Modal ปိတ်ရန် Function
+        // 🆕 Image Zoom Modal ပိတ်ရန် Function
         function closeImageZoomModal() {
             document.getElementById('zoom-img-modal').style.display = "none";
         }
@@ -418,7 +415,6 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
                 
                 let currentTotalUnread = data.users.reduce((sum, u) => sum + (u.unread || 0), 0);
                 
-                // ⚠️ Fix: တကယ့် စာအသစ်ဝင်လာချိန်တွင် Autoplay Block ကို ကျော်ဖြတ်ပြီး အသံမြည်စေရန် ပြင်ဆင်ခြင်း
                 if (currentTotalUnread > previousTotalUnread) {
                     const sound = document.getElementById('noti-sound');
                     if (sound) {
@@ -440,7 +436,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             setTimeout(fetchLiveUpdates, 3000);
         }
 
-        // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း (🕒 Real-time အချိန်စနစ် ထည့်သွင်းထားသည်)
+        // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း
         function renderUserList(users) {
             const container = document.getElementById('users-container');
             if(users.length === 0) {
@@ -460,7 +456,6 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
                     ? `<span style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; font-weight: bold; margin-left: 8px;">${user.unread}</span>`
                     : '';
 
-                // 🕒 စာဝင်လာသည့်အချိန်မပါရှိပါက လက်ရှိအချိန်ကို Real-time ပြပေးမည့် စနစ်
                 let displayTime = user.time || '';
                 if (!displayTime && (user.unread && user.unread > 0 || user.lastMsg)) {
                     const now = new Date();
@@ -516,7 +511,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
                 });
         }
 
-        // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ အစီအစဉ်တကျ ပြသခြင်း (🕒 အချိန်စနစ် ထည့်သွင်းထားသည်)
+        // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ ပြသခြင်း
         function renderChatStream(logs) {
             if(!currentActiveUserId) return;
             
@@ -533,20 +528,18 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
                 let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
                 const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
                 
-                // 🕒 ၁။ စာဝင်/စာထွက်ချိန်ကို HH:MM AM/PM ပုံစံဖြင့် တွက်ချက်ခြင်း (စနစ်ထဲတွင် အချိန်မပါလာပါက လက်ရှိအချိန်ကို ပြပေးမည်)
                 let timeString = "";
                 if (log.time) {
-                    timeString = log.time; // Server က အချိန်ပေးရင် သုံးမည်
+                    timeString = log.time;
                 } else {
                     const now = new Date();
                     timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 }
                 
                 let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0处理;"/>`
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
                     : log.text;
 
-                // ညှပ်ထည့်ချက် - စာသား သို့မဟုတ် ပုံ၏ အောက်ခြေတွင် အချိန်ပြသပေးမည့် msg-time စာတန်းကို ထည့်သွင်းထားပါသည်
                 html += `
                     <div class="message-wrapper">
                         <div class="message ${sideClass}" style="display: flex; flex-direction: column; gap: 4px;">
@@ -564,7 +557,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             }
         }
 
-        // 📷 ကွန်ပျူတာ/ဖုန်းထဲမှ ပုံရွေးပြီး တိုက်ရိုက် Upload လုပ်၍ ပို့မည့် စနစ်သစ်
+        // ပုံရွေးပြီး Upload လုပ်၍ ပို့မည့် စနစ်
         async function uploadAndSendChatImage(input) {
             if (!input.files || !input.files[0] || !currentActiveUserId) return;
             
@@ -599,7 +592,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             }
         }
 
-        // Сာအသစ်ဝင်လာပါက Noti တက်စေပြီး အသံမြည်စေသည့်စနစ်
+        // စာအသစ်ဝင်လာပါက Noti တက်စေပြီး အသံမြည်စေသည့်စနစ်
         function checkNewIncomingNotification(logs) {
             if(logs.length > totalMessagesCount) {
                 let lastLog = logs[logs.length - 1];
@@ -619,7 +612,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             }
         }
 
-        // 📝 စိတ်ကြိုက် နာမည်ပြောင်းပေးနိုင်မည့်စနစ်
+        // နာမည်ပြောင်းပေးနိုင်မည့်စနစ်
         function editCurrentUserName() {
             if(!currentActiveUserId) return;
             let currentId = document.getElementById('det-id').innerText;
@@ -638,7 +631,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             }
         }
 
-        // စာရိုက်ပြီး Send နှိပ်လျှင် ထွက်သွားစေမည့်စနစ် (🕒 အချိန်စနစ် ထည့်သွင်းထားသည်)
+        // စာရိုက်ပြီး Send နှိပ်လျှင် ထွက်သွားစေမည့်စနစ်
         async function pushMessage() {
             let input = document.getElementById('chat-field');
             let text = input.value.trim();
@@ -647,13 +640,11 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             let platform = document.getElementById('det-plat').innerText;
             let userId = document.getElementById('det-id').innerText;
 
-            // 🕒 စာပို့လိုက်သည့် လက်ရှိအချိန်ကို ရယူခြင်း
             const now = new Date();
             const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             let stream = document.getElementById('chat-stream');
             
-            // စာပို့လိုက်လျှင် အောက်ခြေတွင် အချိန်ပါ တစ်ခါတည်း ပြသပေးခြင်း
             stream.innerHTML += `
                 <div class="message-wrapper">
                     <div class="message outgoing" style="display: flex; flex-direction: column; gap: 4px;">
@@ -677,7 +668,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             }
         }
 
-        // 📢 Broadcast စနစ်သစ် လုပ်ဆောင်ချက်
+        // Broadcast စနစ်
         async function executeBroadcast() {
             const text = document.getElementById('bc-text').value.trim();
             const imageUrl = document.getElementById('bc-image-url').value.trim();
@@ -699,24 +690,23 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
                     document.getElementById('bc-text').value = "";
                     document.getElementById('bc-image-url').value = "";
                 } else {
-                    alert("Broadcast ปို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
+                    alert("Broadcast ပို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
                 }
             } catch (err) {
                 console.error(err);
-                alert("ဆာဗာနှင့် ချက်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
+                alert("ဆာဗာနှင့် ချိတ်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
             }
         }
 
-        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် စနစ် (အသံကျယ်ကျယ်ထွက်အောင် အဆင့်မြှင့်ထားသည်)
+        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် စနစ်
 function triggerDemoNotification() { 
-    const sound = document.getElementById('noti-sound'); // HTML ID နှင့် တိုက်ရိုက်ချိတ်ဆက်ခြင်း
+    const sound = document.getElementById('noti-sound'); 
     const notiBox = document.getElementById('notification-box');
 
     if (sound) {
-        sound.volume = 1.0; // 👈 မူလအသံပမာဏကို ၁၀၀% အပြည့်ဖွင့်ခြင်း
-        sound.currentTime = 0; // 👈 အသံကို အစကနေ ပြန်စဖွင့်ခြင်း
+        sound.volume = 1.0; 
+        sound.currentTime = 0; 
 
-        // 🔊 အသံလိုင်းကို ၂ ဆ မှ ၃ ဆအထိ ထပ်မံရိုက်ခွဲ၍ မာလ်တီပလိုင်းယာဖြင့် ဖွင့်ပေးမည့် အသံချဲ့စနစ်သစ်
         try {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if (AudioContext && !sound._gainNode) {
@@ -724,39 +714,34 @@ function triggerDemoNotification() {
                 const source = ctx.createMediaElementSource(sound);
                 const gainNode = ctx.createGain();
 
-                // 🚀 အသံအကျယ်အဝန်း ပမာဏ (လက်ရှိထက် ၃ ဆ ပိုကျယ်စေရန် သတ်မှတ်ခြင်း)
                 gainNode.gain.value = 3.0; 
 
-                // 🔗 အသံလမ်းကြောင်း ချိတ်ဆက်မှု (ဒါက အရေးကြီးဆုံးအပိုင်းပါ)
-                source.connect(gainNode);       // အသံကို အသံချဲ့စက်ထဲ သွင်းမယ်
-                gainNode.connect(ctx.destination); // 👈 အသံချဲ့စက်ကိုမှ Speaker (Destination) ထဲ ပြန်ထည့်မယ် (ဒါမှ အသံတကယ်ကျယ်မှာပါ)
+                source.connect(gainNode);       
+                gainNode.connect(ctx.destination); 
 
-                sound._gainNode = gainNode; // တူညီသော Node ထပ်မပွားစေရန် သိမ်းထားခြင်း
+                sound._gainNode = gainNode; 
             }
         } catch (ae) { 
             console.log(ae); 
         }
 
-        // အသံကို စတင်ဖွင့်ခြင်း
         sound.play().catch(error => {
             console.log("Browser က အသံကို ပိတ်ထားသဖြင့် ကလစ်နှိပ်ရန် စောင့်ဆိုင်းနေပါသည်...");
             document.body.addEventListener('click', () => { sound.play(); }, { once: true });
         });
     }
 
-    // Noti Pop-up Box အပေါ်တွင် စာသားများ ပြသခြင်း
     if (notiBox) {
         document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
         document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
         notiBox.style.display = "flex";
 
-        // ၅ စက္ကန့်ပြည့်လျှင် Noti Box ပြန်ပျောက်သွားစေရန်
         setTimeout(() => {
             notiBox.style.display = "none";
         }, 5000);
     }
 }
-        // 🔊 အသံချဲ့စနစ်ပါဝင်သော မိတ်ဆွေသစ် Noti အသံမြည်သည့် Function
+        // Noti အသံမြည်သည့် Function
         function playNotificationSound() {
             try {
                 const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -764,15 +749,12 @@ function triggerDemoNotification() {
                 
                 const ctx = new AudioContext();
                 const oscillator = ctx.createOscillator();
-                const gainNode = ctx.createGain(); // အသံချဲ့စက် Node
+                const gainNode = ctx.createGain(); 
 
                 oscillator.type = 'sine'; 
-                oscillator.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 Note (ကြည်လင်ပြတ်သားသော အသံ)
-
-                // 🚀 အသံပမာဏကို လက်ရှိထက် ၃ ဆ ပိုကျယ်စေရန် ပြင်ဆင်ထားပါသည် (4.0 သို့မဟုတ် 5.0 ထိ တိုးနိုင်သည်)
-                const volumeLevel = 100.0; 
+                oscillator.frequency.setValueAtTime(587.33, ctx.currentTime); 
                 
-                gainNode.gain.setValueAtTime(volumeLevel, ctx.currentTime);
+                gainNode.gain.setValueAtTime(100.0, ctx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); 
 
                 oscillator.connect(gainNode);
