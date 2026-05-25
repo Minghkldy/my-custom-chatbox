@@ -323,6 +323,29 @@
                     });
                 });
             }
+            // Show/Hide Password Toggle Function
+function setupTokenToggle(inputId, toggleButtonId) {
+    const inputField = document.getElementById(inputId);
+    const toggleButton = document.getElementById(toggleButtonId);
+
+    if (inputField && toggleButton) {
+        toggleButton.addEventListener('click', function () {
+            // type က password ဖြစ်နေရင် text ပြောင်း၊ text ဖြစ်နေရင် password ပြန်ပြောင်းမယ်
+            if (inputField.type === 'password') {
+                inputField.type = 'text';
+                toggleButton.textContent = '🙈'; // မျက်လုံးပိတ် (သို့မဟုတ် အခြား icon)
+            } else {
+                inputField.type = 'password';
+                toggleButton.textContent = '👁️'; // မျက်လုံးဖွင့် (သို့မဟုတ် အခြား icon)
+            }
+        });
+    }
+}
+
+// ခလုတ်တစ်ခုချင်းစီအတွက် စနစ်ကို Activation လုပ်ခြင်း
+setupTokenToggle('storage-tg-token', 'toggle-tg-token');
+setupTokenToggle('storage-fb-token', 'toggle-fb-token');
+setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
 
             // 📷 ညှပ်ထည့်ချက် - Send Box တွင် ပုံများကို Copy Paste (Ctrl + V) ချ၍ ပို့နိုင်မည့်စနစ်သစ်
             const chatField = document.getElementById('chat-field');
@@ -725,7 +748,7 @@
                 oscillator.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 Note (ကြည်လင်ပြတ်သားသော အသံ)
 
                 // 🚀 အသံပမာဏကို လက်ရှိထက် ၃ ဆ ပိုကျယ်စေရန် ပြင်ဆင်ထားပါသည် (4.0 သို့မဟုတ် 5.0 ထိ တိုးနိုင်သည်)
-                const volumeLevel = 10.0; 
+                const volumeLevel = 100.0; 
                 
                 gainNode.gain.setValueAtTime(volumeLevel, ctx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); 
