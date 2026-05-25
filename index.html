@@ -38,7 +38,15 @@
         .chat-header { height: 60px; background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; align-items: center; padding: 0 20px; font-weight: bold; justify-content: space-between; }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message-wrapper { display: flex; flex-direction: column; width: 100%; }
-       .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; word-break: break-word; white-space: pre-wrap; }
+      .message { 
+    padding: 10px 16px; 
+    border-radius: 12px; 
+    max-width: 65%; 
+    font-size: 14px; 
+    line-height: 1.4; 
+    word-break: break-word; 
+    white-space: pre-wrap !important; /* 👈 !important ပါ ထည့်ပေးလိုက်ရင် စာစီတာ (Enter ဆင်းတာ) ရာနှုန်းပြည့် ရသွားပါလိမ့်မယ် */
+}
         .message.incoming { background-color: #1e293b; color: #f3f4f6; align-self: flex-start; border-bottom-left-radius: 2px; }
         .message.outgoing { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .message img {
