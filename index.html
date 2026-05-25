@@ -364,6 +364,25 @@ window.onload = function() {
     }
 }; // <--- 🔑 အရေးကြီးဆုံးဖြစ်တဲ့ window.onload ပိတ်တဲ့ကွင်း ဒီမှာ စနစ်တကျ ပိတ်ပေးလိုက်ပါပြီ
 
+// Facebook Settings များကို Save နှိပ်လျှင် localStorage ထဲသို့ သိမ်းဆည်းပေးမည့် စနစ်သစ်
+function saveSingleSetting(type) {
+    if (type === 'fb') {
+        const fbToken = document.getElementById('storage-fb-token').value.trim();
+        const fbVerify = document.getElementById('storage-fb-verify').value.trim();
+
+        if (!fbToken || !fbVerify) {
+            alert("⚠️ Facebook Token နှင့် Verify Token နှစ်ခုစလုံးကို ဖြည့်စွက်ပေးပါရန်။");
+            return;
+        }
+
+        localStorage.setItem('FB_TOKEN', fbToken);
+        localStorage.setItem('FB_VERIFY', fbVerify);
+
+        alert("✅ Facebook Messenger Settings များကို အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ။");
+        location.reload();
+    }
+}
+
 // Show/Hide Password Toggle Function
 function setupTokenToggle(inputId, toggleButtonId) {
     const inputField = document.getElementById(inputId);
