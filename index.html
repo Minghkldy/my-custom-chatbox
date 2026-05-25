@@ -288,7 +288,7 @@
             }
         }
 
-        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
+// စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
         window.onload = function() {
             if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
             if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
@@ -296,8 +296,14 @@
             
             fetchLiveUpdates();
 
+            // 🖼️ [အမှန်ပြင်ပြီး] Chat Stream ထဲက တကယ့် Message ပုံတွေကိုပဲ စစ်ထုတ်ပြီး အကြီးချဲ့မည့်စနစ်
             document.getElementById('chat-stream').addEventListener('click', function(e) {
                 if (e.target && e.target.tagName === 'IMG') {
+                    // 🚀 အကယ်၍ နှိပ်လိုက်မိသည့်ပုံသည် Setting Group, Button သို့မဟုတ် h3 ခေါင်းစဉ်ထဲကပုံဖြစ်နေပါက လုံးဝ အကြီးမချဲ့ရန် ကျော်သွားမည်
+                    if (e.target.closest('button') || e.target.closest('.form-group') || e.target.closest('h3')) {
+                        return; 
+                    }
+                    // တကယ့် Chat Message ထဲက ပုံဆိုရင်တော့ ပုံကြီးချဲ့ပေးမည်
                     openImageZoomModal(e.target.src);
                 }
             });
@@ -525,7 +531,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
                 }
                 
                 let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
+                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0处理;"/>`
                     : log.text;
 
                 // ညှပ်ထည့်ချက် - စာသား သို့မဟုတ် ပုံ၏ အောက်ခြေတွင် အချိန်ပြသပေးမည့် msg-time စာတန်းကို ထည့်သွင်းထားပါသည်
@@ -681,7 +687,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
                     document.getElementById('bc-text').value = "";
                     document.getElementById('bc-image-url').value = "";
                 } else {
-                    alert("Broadcast ပို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
+                    alert("Broadcast ปို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
                 }
             } catch (err) {
                 console.error(err);
