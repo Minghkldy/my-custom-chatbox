@@ -725,7 +725,7 @@
                 oscillator.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 Note (ကြည်လင်ပြတ်သားသော အသံ)
 
                 // 🚀 အသံပမာဏကို လက်ရှိထက် ၃ ဆ ပိုကျယ်စေရန် ပြင်ဆင်ထားပါသည် (4.0 သို့မဟုတ် 5.0 ထိ တိုးနိုင်သည်)
-                const volumeLevel = 3.0; 
+                const volumeLevel = 10.0; 
                 
                 gainNode.gain.setValueAtTime(volumeLevel, ctx.currentTime);
                 gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); 
