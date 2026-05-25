@@ -15,7 +15,7 @@ const RENDER_BACKEND_URL = "https://my-custom-chatbox.onrender.com";
 let configStorage = {
     tgToken: '',
     fbToken: '',
-    fbVerify: ''
+    fbVerify: process.env.MESSENGER_VERIFY_TOKEN || 'mySecretVerify123'
 };
 let messageLogs = [];
 let userList = [];
