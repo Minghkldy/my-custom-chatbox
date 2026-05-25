@@ -186,34 +186,29 @@
                 
                 <hr style="border: 0; border-top: 1px solid #1f2937; margin-bottom: 15px;">
 
-            <h3 style="color: #0088cc; margin-bottom: 10px;">🤖 Telegram Bot Setup</h3>
-        <div class="form-group">
-            <label>Telegram Bot Token API</label>
-            <div style="position: relative; display: flex; align-items: center;">
-                <input type="password" id="storage-tg-token" class="form-control" placeholder="8001071543:AAF31oDWXNC6FAbQ_B-oTz1lJeviZDm4vyw">
-                <button type="button" id="toggle-tg-token" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer;">👁️</button>
-            </div>
-            <button class="btn-primary" onclick="saveSingleSetting('tg')" style="background-color: #0088cc; margin-bottom: 25px;">Save Telegram Token Only 🤖</button>
+           <h3 style="color: #0088cc; margin-bottom: 10px;">🤖 Telegram Bot Setup</h3>
+<div class="form-group">
+    <label>Telegram Bot Token API</label>
+    <div style="position: relative; display: flex; align-items: center;">
+        <input type="password" id="storage-tg-token" class="form-control" placeholder="8001071543:AAF31oDWXNC6FAbQ_B-oTz1lJeviZDm4vyw">
+        <button type="button" id="toggle-tg-token" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer;">👁️</button>
+    </div>
+</div> <button class="btn-primary" onclick="saveSingleSetting('tg')" style="background-color: #0088cc; margin-bottom: 25px;">Save Telegram Token Only 🤖</button>
 
-            <h3 style="color: #006aff; margin-top: 20px; margin-bottom: 10px;">💬 Facebook Messenger Setup</h3>
-            <div class="form-group">
-                <label>Messenger Page Access Token</label>
-                <div style="position: relative; display: flex; align-items: center;">
-                    <input type="password" id="storage-fb-token" class="form-control" placeholder="EAAGm... ဟုစမည့် Page Access Token အရှည်ကြီး ထည့်ပါ">
-                    <button type="button" id="toggle-fb-token" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer;">👁️</button>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>Webhook Verify Token (Render နှင့် ချိတ်စဉ်က သုံးခဲ့သော လျှို့ဝှက်စာလုံး)</label>
-                <div style="position: relative; display: flex; align-items: center;">
-                    <input type="password" id="storage-fb-verify" class="form-control" placeholder="ဥပမာ- my_super_secret_token_123">
-                    <button type="button" id="toggle-fb-verify" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer;">👁️</button>
-                </div>
-            </div>
-
-            <button class="btn-primary" onclick="saveSingleSetting('fb')" style="background-color: #006aff;">Save Facebook Settings Only 💬</button>
-        </div>
+<h3 style="color: #006aff; margin-top: 20px; margin-bottom: 10px;">💬 Facebook Messenger Setup</h3>
+<div class="form-group">
+    <label>Messenger Page Access Token</label>
+    <div style="position: relative; display: flex; align-items: center;">
+        <input type="password" id="storage-fb-token" class="form-control" placeholder="EAAGm... ဟုစမည့် Page Access Token အရှည်ကြီး ထည့်ပါ">
+        <button type="button" id="toggle-fb-token" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer;">👁️</button>
+    </div>
+</div> <div class="form-group">
+    <label>Webhook Verify Token (Render နှင့် ချိတ်စဉ်က သုံးခဲ့သော လျှို့ဝှက်စာလုံး)</label>
+    <div style="position: relative; display: flex; align-items: center;">
+        <input type="password" id="storage-fb-verify" class="form-control" placeholder="ဥပမာ- my_super_secret_token_123">
+        <button type="button" id="toggle-fb-verify" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer;">👁️</button>
+    </div>
+</div> <button class="btn-primary" onclick="saveSingleSetting('fb')" style="background-color: #006aff;">Save Facebook Settings Only 💬</button>
     <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
         <span class="zoom-close-btn" onclick="closeImageZoomModal()">&times;</span>
         <img class="zoom-modal-content" id="zoom-target-src">
@@ -694,52 +689,55 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             }
         }
 
-        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် (စနစ်တကျ ပြင်ဆင်ပြီး)
-        function triggerDemoNotification() {
-            const sound = document.getElementById('noti-sound'); // HTML ID နှင့် တိုက်ရိုက်ချိတ်ဆက်ခြင်း
-            const notiBox = document.getElementById('notification-box');
-            
-            if (sound) {
-                sound.volume = 1.0;  // 👈 အသံပမာဏကို ၁၀၀% အပြည့်ဖွင့်ခိုင်းခြင်း
-                sound.currentTime = 0; // အသံကို အစကနေ ပြန်စဖွင့်ခြင်း
-                
-                // 🔊 အသံလှိုင်းကို ၂ ဆမှ ၃ ဆအထိ ထပ်မံချဲ့ထွင်၍ ဖွင့်ပေးမည့် စနစ်သစ်
-                try {
-                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                    if (AudioContext && !sound._gainNode) {
-                        const ctx = new AudioContext();
-                        const source = ctx.createMediaElementSource(sound);
-                        const gainNode = ctx.createGain();
-                        
-                        // 🚀 အသံအကျယ်အဝန်း ပမာဏ (လက်ရှိထက် ၃ ဆ ပိုကျယ်စေရန်)
-                        gainNode.gain.value = 3.0; 
-                        
-                        source.connect(gainNode);
-                        gainNode.connect(ctx.destination);
-                        sound._gainNode = gainNode; // တူညီသော Node ထပ်မပွားစေရန် သိမ်းထားခြင်း
-                    }
-                } catch (ae) { console.log(ae); }
+        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် စနစ် (အသံကျယ်ကျယ်ထွက်အောင် အဆင့်မြှင့်ထားသည်)
+function triggerDemoNotification() { 
+    const sound = document.getElementById('noti-sound'); // HTML ID နှင့် တိုက်ရိုက်ချိတ်ဆက်ခြင်း
+    const notiBox = document.getElementById('notification-box');
 
-                // အသံကို စတင်ဖွင့်ခြင်း
-                sound.play().catch(error => {
-                    console.log("Browser က အသံကို ပိတ်ထားသဖြင့် ကလစ်နှိပ်ရန် စောင့်ဆိုင်းနေပါသည်...");
-                    document.body.addEventListener('click', () => { sound.play(); }, { once: true });
-                });
-            }
+    if (sound) {
+        sound.volume = 1.0; // 👈 မူလအသံပမာဏကို ၁၀၀% အပြည့်ဖွင့်ခြင်း
+        sound.currentTime = 0; // 👈 အသံကို အစကနေ ပြန်စဖွင့်ခြင်း
 
-            // Noti Pop-up Box အပေါ်တွင် စာသားများ ပြသခြင်း
-            if (notiBox) {
-                document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
-                document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
-                notiBox.style.display = "flex";
-                
-                // ၄ စက္ကန့်ပြည့်လျှင် Noti Box ပြန်ပျောက်သွားစေရန်
-                setTimeout(() => { 
-                    notiBox.style.display = "none"; 
-                }, 4000);
+        // 🔊 အသံလိုင်းကို ၂ ဆ မှ ၃ ဆအထိ ထပ်မံရိုက်ခွဲ၍ မာလ်တီပလိုင်းယာဖြင့် ဖွင့်ပေးမည့် အသံချဲ့စနစ်သစ်
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext && !sound._gainNode) {
+                const ctx = new AudioContext();
+                const source = ctx.createMediaElementSource(sound);
+                const gainNode = ctx.createGain();
+
+                // 🚀 အသံအကျယ်အဝန်း ပမာဏ (လက်ရှိထက် ၃ ဆ ပိုကျယ်စေရန် သတ်မှတ်ခြင်း)
+                gainNode.gain.value = 3.0; 
+
+                // 🔗 အသံလမ်းကြောင်း ချိတ်ဆက်မှု (ဒါက အရေးကြီးဆုံးအပိုင်းပါ)
+                source.connect(gainNode);       // အသံကို အသံချဲ့စက်ထဲ သွင်းမယ်
+                gainNode.connect(ctx.destination); // 👈 အသံချဲ့စက်ကိုမှ Speaker (Destination) ထဲ ပြန်ထည့်မယ် (ဒါမှ အသံတကယ်ကျယ်မှာပါ)
+
+                sound._gainNode = gainNode; // တူညီသော Node ထပ်မပွားစေရန် သိမ်းထားခြင်း
             }
+        } catch (ae) { 
+            console.log(ae); 
         }
 
+        // အသံကို စတင်ဖွင့်ခြင်း
+        sound.play().catch(error => {
+            console.log("Browser က အသံကို ပိတ်ထားသဖြင့် ကလစ်နှိပ်ရန် စောင့်ဆိုင်းနေပါသည်...");
+            document.body.addEventListener('click', () => { sound.play(); }, { once: true });
+        });
+    }
+
+    // Noti Pop-up Box အပေါ်တွင် စာသားများ ပြသခြင်း
+    if (notiBox) {
+        document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
+        document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
+        notiBox.style.display = "flex";
+
+        // ၅ စက္ကန့်ပြည့်လျှင် Noti Box ပြန်ပျောက်သွားစေရန်
+        setTimeout(() => {
+            notiBox.style.display = "none";
+        }, 5000);
+    }
+}
         // 🔊 အသံချဲ့စနစ်ပါဝင်သော မိတ်ဆွေသစ် Noti အသံမြည်သည့် Function
         function playNotificationSound() {
             try {
