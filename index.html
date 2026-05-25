@@ -301,11 +301,17 @@
             return;
         }
         
-        // ၃။ ကျန်တဲ့ Chat ထဲက ပုံမှန်သမျှကို ဝုန်းခနဲ ပွင့်စေမယ်!
+        // ၃။ ကျန်တဲ့ Chat ထဲက ပုံမှန်သမျှကို ပွင့်စေမယ်!
         openImageZoomModal(e.target.src);
     }
+}); // <--- ဒီနေရာမှာ ကွင်းပိတ်စနစ် တိကျသွားပါပြီ
+
+// ပုံကြီးပေါ်လာတဲ့အချိန် အပြင်ဘက်ကိုနှိပ်ရင် ပြန်ပိတ်ပေးမယ့် ကုဒ်
+document.getElementById('zoom-img-modal').addEventListener('click', function(e) {
+    if (e.target.id === 'zoom-img-modal') {
+        closeImageZoomModal();
+    }
 });
-            
             // 🔍 ဤနေရာတွင် Search Bar စနစ်ကို တိုက်ရိုက် ညှပ်ထည့်ပါ
             const searchInput = document.getElementById('user-search-input');
             if (searchInput) {
