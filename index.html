@@ -285,418 +285,421 @@
         }
 
 // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
-        window.onload = function() {
-            if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
-            if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
-            if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
+window.onload = function() {
+    if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
+    if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
+    if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
             
-            fetchLiveUpdates();
+    fetchLiveUpdates();
 
-        document.body.addEventListener('click', function(e) {
-    // ၁။ နှိပ်လိုက်တဲ့အရာက ပုံ (IMG) ဖြစ်ရမယ်
-    if (e.target && e.target.tagName === 'IMG') {
-        
-        // ၂။ အဲဒီပုံက ဘယ်ဘက်က Setting Icon တွေ၊ Sidebar ထဲကပုံတွေဆိုရင် Return ပြန်မယ် (မပွင့်စေရဘူး)
-        if (e.target.closest('.main-sidebar') || e.target.closest('.menu-icon') || e.target.closest('#ico-settings')) {
-            return;
-        }
-        
-        // ၃။ ကျန်တဲ့ Chat ထဲက ပုံမှန်သမျှကို ပွင့်စေမယ်!
-        openImageZoomModal(e.target.src);
-    }
-}); // <--- ဒီနေရာမှာ ကွင်းပိတ်စနစ် တိကျသွားပါပြီ
-
-// ပုံကြီးပေါ်လာတဲ့အချိန် အပြင်ဘက်ကိုနှိပ်ရင် ပြန်ပိတ်ပေးမယ့် ကုဒ်
-document.getElementById('zoom-img-modal').addEventListener('click', function(e) {
-    if (e.target.id === 'zoom-img-modal') {
-        closeImageZoomModal();
-    }
-});
-            // 🔍 ဤနေရာတွင် Search Bar စနစ်ကို တိုက်ရိုက် ညှပ်ထည့်ပါ
-            const searchInput = document.getElementById('user-search-input');
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const keyword = e.target.value.toLowerCase().trim();
-                    const userItems = document.querySelectorAll('.user-item');
-                    userItems.forEach(item => {
-                        const userNameText = item.querySelector('.user-name span').textContent.toLowerCase();
-                        if (userNameText.includes(keyword)) {
-                            item.style.display = 'flex';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                });
+    // ၁။ Chat ထဲက ပုံကို နှိပ်ရင် ပုံကြီးချဲ့ဖမ်းမယ့် စနစ်
+    document.body.addEventListener('click', function(e) {
+        // နှိပ်လိုက်တဲ့အရာက ပုံ (IMG) ဖြစ်ရမယ်
+        if (e.target && e.target.tagName === 'IMG') {
+            // အဲဒီပုံက ဘယ်ဘက်က Setting Icon တွေ၊ Sidebar ထဲကပုံတွေဆိုရင် ကျော်သွားမယ် (မပွင့်စေရဘူး)
+            if (e.target.closest('.main-sidebar') || e.target.closest('.menu-icon') || e.target.closest('#ico-settings') || e.target.closest('.avatar')) {
+                return;
             }
-            // Show/Hide Password Toggle Function
+            // တkယ့် Chat ထဲက ပုံမှန်သမျှကို ပွင့်စေမယ်!
+            openImageZoomModal(e.target.src);
+        }
+    });
+
+    // ၂။ ပုံကြီးပေါ်လာတဲ့အချိန် အပြင်ဘက်မည်းမည်းကို နှိပ်ရင် ပြန်ပိတ်ပေးမယ့် ကုဒ်
+    document.body.addEventListener('click', function(e) {
+        if (e.target.id === 'zoom-img-modal') {
+            closeImageZoomModal();
+        }
+    });
+
+    // 🔍 Search Bar စနစ်
+    const searchInput = document.getElementById('user-search-input');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const keyword = e.target.value.toLowerCase().trim();
+            const userItems = document.querySelectorAll('.user-item');
+            userItems.forEach(item => {
+                const userNameNode = item.querySelector('.user-name span');
+                if (userNameNode) {
+                    const userNameText = userNameNode.textContent.toLowerCase();
+                    if (userNameText.includes(keyword)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+            });
+        });
+    }
+
+    // Show/Hide Password Toggle စနစ် Activation ပေးခြင်း
+    setupTokenToggle('storage-tg-token', 'toggle-tg-token');
+    setupTokenToggle('storage-fb-token', 'toggle-fb-token');
+    setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
+
+    // 📷 Send Box တွင် ပုံများကို Copy Paste (Ctrl + V) ချ၍ ပို့နိုင်မည့်စနစ်သစ်
+    const chatField = document.getElementById('chat-field');
+    if (chatField) {
+        chatField.addEventListener('paste', async function(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    const blob = item.getAsFile();
+                    
+                    chatField.placeholder = "📷 Uploading image, please wait...";
+                    chatField.disabled = true;
+
+                    const mockInput = { files: [blob] };
+                    await uploadAndSendChatImage(mockInput);
+
+                    chatField.placeholder = "Type a message...";
+                    chatField.disabled = false;
+                    chatField.focus();
+                    
+                    e.preventDefault();
+                }
+            }
+        });
+    }
+}; // <--- 🔑 အရေးကြီးဆုံးဖြစ်တဲ့ window.onload ပိတ်တဲ့ကွင်း ဒီမှာ စနစ်တကျ ပိတ်ပေးလိုက်ပါပြီ
+
+// Show/Hide Password Toggle Function
 function setupTokenToggle(inputId, toggleButtonId) {
     const inputField = document.getElementById(inputId);
     const toggleButton = document.getElementById(toggleButtonId);
 
     if (inputField && toggleButton) {
         toggleButton.addEventListener('click', function () {
-            // type က password ဖြစ်နေရင် text ပြောင်း၊ text ဖြစ်နေရင် password ပြန်ပြောင်းမယ်
             if (inputField.type === 'password') {
                 inputField.type = 'text';
-                toggleButton.textContent = '🙈'; // မျက်လုံးပိတ် (သို့မဟုတ် အခြား icon)
+                toggleButton.textContent = '🙈';
             } else {
                 inputField.type = 'password';
-                toggleButton.textContent = '👁️'; // မျက်လုံးဖွင့် (သို့မဟုတ် အခြား icon)
+                toggleButton.textContent = '👁️';
             }
         });
     }
 }
 
-// ခလုတ်တစ်ခုချင်းစီအတွက် စနစ်ကို Activation လုပ်ခြင်း
-setupTokenToggle('storage-tg-token', 'toggle-tg-token');
-setupTokenToggle('storage-fb-token', 'toggle-fb-token');
-setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
+// [ID ရော တည်နေရာပါ ညှိပြီး] Image Zoom Modal ဖွင့်ရန် Function
+function openImageZoomModal(imgSrc) {
+    const modal = document.getElementById('zoom-img-modal');
+    let modalImg = document.getElementById('zoom-target-src') || document.getElementById('zoom-img-content');
+    
+    if (!modalImg && modal) {
+        modalImg = modal.querySelector('img'); 
+    }
 
-            // 📷 ညှပ်ထည့်ချက် - Send Box တွင် ပုံများကို Copy Paste (Ctrl + V) ချ၍ ပို့နိုင်မည့်စနစ်သစ်
-            const chatField = document.getElementById('chat-field');
-            if (chatField) {
-                chatField.addEventListener('paste', async function(e) {
-                    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                    for (let index in items) {
-                        const item = items[index];
-                        if (item.kind === 'file' && item.type.startsWith('image/')) {
-                            // ပုံတွေ့ရှိပါက Clipboard ထဲမှ ပုံဖိုင်ကို ဆွဲယူခြင်း
-                            const blob = item.getAsFile();
-                            
-                            // အသုံးပြုသူအား ပုံပို့နေပြီဖြစ်ကြောင်း သိစေရန် အချက်ပြခြင်း
-                            chatField.placeholder = "📷 Uploading image, please wait...";
-                            chatField.disabled = true;
+    if (modal && modalImg) {
+        modalImg.src = imgSrc;
+        modal.style.display = "flex"; 
+    } else if (modal) {
+        modal.style.display = "block";
+    }
+}
 
-                            // စနစ်ဟောင်းထဲက uploadAndSendChatImage စနစ်ဆီသို့ Form ဒေတာဖြင့် လွှဲပြောင်းပို့ဆောင်ခြင်း
-                            const mockInput = { files: [blob] };
-                            await uploadAndSendChatImage(mockInput);
+// Image Zoom Modal ပိတ်ရန် Function
+function closeImageZoomModal() {
+    const modal = document.getElementById('zoom-img-modal');
+    if (modal) {
+        modal.style.display = "none";
+    }
+}
 
-                            // ပုံပို့ပြီးပါက Send Box ကို ပုံမှန်အတိုင်း ပြန်ပြင်ခြင်း
-                            chatField.placeholder = "Type a message...";
-                            chatField.disabled = false;
-                            chatField.focus();
-                            
-                            e.preventDefault(); // စာရိုက်ကွက်ထဲတွင် [object File] ဟု စာသားပေါ်မလာစေရန် တားဆီးခြင်း
-                        }
-                    }
+// 🔄 ၃ စက္ကန့်တစ်ကြိမ် Server ထံမှ စာဝင်/စာထွက်များကို ပုံမှန်ဆွဲယူမည့် Polling စနစ်
+async function fetchLiveUpdates() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/messages`);
+        const data = await response.json();
+        
+        let currentTotalUnread = data.users.reduce((sum, u) => sum + (u.unread || 0), 0);
+        
+        if (typeof previousTotalUnread !== 'undefined' && currentTotalUnread > previousTotalUnread) {
+            const sound = document.getElementById('noti-sound');
+            if (sound) {
+                sound.currentTime = 0;
+                sound.play().catch(error => {
+                    console.log("Browser blocked sound play. Waiting for click...");
+                    document.body.addEventListener('click', () => { sound.play(); }, { once: true });
                 });
             }
         }
+        previousTotalUnread = currentTotalUnread;
 
-        // 🆕 [ID ရော တည်နေရာပါ ညှိပြီး] Image Zoom Modal ဖွင့်ရန် Function
-        function openImageZoomModal(imgSrc) {
-            const modal = document.getElementById('zoom-img-modal');
-            let modalImg = document.getElementById('zoom-target-src') || document.getElementById('zoom-img-content');
-            
-            if (!modalImg && modal) {
-                modalImg = modal.querySelector('img'); 
-            }
+        renderUserList(data.users);
+        renderChatStream(data.logs);
+        checkNewIncomingNotification(data.logs);
+    } catch (e) {
+        console.log("Waiting for data stream connecting...");
+    }
+    setTimeout(fetchLiveUpdates, 3000);
+}
 
-            if (modal && modalImg) {
-                modalImg.src = imgSrc;
-                modal.style.display = "flex"; 
-            } else if (modal) {
-                modal.style.display = "block";
-            }
-        }
+// ဘယ်ဘက်ခြမ်း User List ကို ပြသပေးခြင်း
+function renderUserList(users) {
+    const container = document.getElementById('users-container');
+    if (!container) return;
+    
+    if(users.length === 0) {
+        container.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>`;
+        return;
+    }
 
-        // 🆕 Image Zoom Modal ပိတ်ရန် Function
-        function closeImageZoomModal() {
-            document.getElementById('zoom-img-modal').style.display = "none";
-        }
+    let html = '';
+    users.forEach(user => {
+        let displayName = localCustomNames[user.id] || user.name;
+        let activeClass = user.id == currentActiveUserId ? 'active' : '';
+        let badgeClass = user.platform === 'Telegram' ? 'badge-tg' : 'badge-msg';
+        let platformLabel = user.platform === 'Telegram' ? 'TG' : 'FB';
+        let initial = displayName.charAt(0);
 
-        // 🔄 ၃ စက္ကန့်တစ်ကြိမ် Server ထံမှ စာဝင်/စာထွက်များကို ပုံမှန်ဆွဲယူမည့် နှလုံးခုန်စနစ် (Polling)
-        async function fetchLiveUpdates() {
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/messages`);
-                const data = await response.json();
-                
-                let currentTotalUnread = data.users.reduce((sum, u) => sum + (u.unread || 0), 0);
-                
-                if (currentTotalUnread > previousTotalUnread) {
-                    const sound = document.getElementById('noti-sound');
-                    if (sound) {
-                        sound.currentTime = 0;
-                        sound.play().catch(error => {
-                            console.log("Browser blocked real-time sound play. Waiting for click workaround...");
-                            document.body.addEventListener('click', () => { sound.play(); }, { once: true });
-                        });
-                    }
-                }
-                previousTotalUnread = currentTotalUnread;
+        let unreadBadgeHtml = (user.unread && user.unread > 0)
+            ? `<span style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; font-weight: bold; margin-left: 8px;">${user.unread}</span>`
+            : '';
 
-                renderUserList(data.users);
-                renderChatStream(data.logs);
-                checkNewIncomingNotification(data.logs);
-            } catch (e) {
-                console.log("Waiting for data stream connecting...");
-            }
-            setTimeout(fetchLiveUpdates, 3000);
-        }
-
-        // ဘယ်ဘက်ခြမ်း User List ကို Server ကလာသည့် ဒေတာအတိုင်း ဆွဲထုတ်ပေးခြင်း
-        function renderUserList(users) {
-            const container = document.getElementById('users-container');
-            if(users.length === 0) {
-                container.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>`;
-                return;
-            }
-
-            let html = '';
-            users.forEach(user => {
-                let displayName = localCustomNames[user.id] || user.name;
-                let activeClass = user.id == currentActiveUserId ? 'active' : '';
-                let badgeClass = user.platform === 'Telegram' ? 'badge-tg' : 'badge-msg';
-                let platformLabel = user.platform === 'Telegram' ? 'TG' : 'FB';
-                let initial = displayName.charAt(0);
-
-                let unreadBadgeHtml = (user.unread && user.unread > 0)
-                    ? `<span style="background-color: #ef4444; color: white; border-radius: 50%; padding: 2px 7px; font-size: 11px; font-weight: bold; margin-left: 8px;">${user.unread}</span>`
-                    : '';
-
-                let displayTime = user.time || '';
-                if (!displayTime && (user.unread && user.unread > 0 || user.lastMsg)) {
-                    const now = new Date();
-                    displayTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }
-
-                html += `
-                    <div class="user-item ${activeClass}" id="user-node-${user.id}" onclick="selectUser('${user.name.replace(/'/g, "\\'")}', '${user.platform}', '${user.id}', '${user.gender}')">
-                        <div class="avatar">${initial}<div class="platform-badge ${badgeClass}">${platformLabel}</div></div>
-                        <div class="user-info">
-                            <div class="user-name">
-                                <span>${displayName} ${unreadBadgeHtml}</span> 
-                                <span class="msg-time">${displayTime}</span>  </div>
-                            <div class="last-msg">${user.lastMsg || ''}</div>
-                        </div>
-                    </div>
-                `;
-            });
-            container.innerHTML = html;
-        }
-
-        // လူတစ်ယောက်ကို ရွေးချယ်လိုက်လျှင် Profile Detail ကို ပြောင်းပေးခြင်း
-        async function selectUser(name, platform, id, gender) {
-            currentActiveUserId = id;
-            let displayName = localCustomNames[id] || name;
-
-            document.getElementById('active-chat-title').innerText = `💬 Chatting with ${displayName}`;
-            document.getElementById('det-av').innerText = displayName.charAt(0);
-            document.getElementById('det-name').innerText = displayName;
-            document.getElementById('det-id').innerText = id;
-            document.getElementById('det-plat').innerText = platform;
-            document.getElementById('det-gen').innerText = gender;
-
-            document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
-            const currentNode = document.getElementById(`user-node-${id}`);
-            if(currentNode) currentNode.classList.add('active');
-
-            try {
-                await fetch(`${BACKEND_URL}/api/mark-read`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId: id })
-                });
-            } catch (err) {
-                console.log("Read status update skipped");
-            }
-
-            fetch(`${BACKEND_URL}/api/messages`)
-                .then(res => res.json())
-                .then(data => {
-                    renderUserList(data.users);
-                    renderChatStream(data.logs);
-                });
-        }
-
-        // စကားပြောခန်းအလယ်၌ မက်ဆေ့ခ်ျများ ပြသခြင်း
-        function renderChatStream(logs) {
-            if(!currentActiveUserId) return;
-            
-            const stream = document.getElementById('chat-stream');
-            let activeLogs = logs.filter(log => log.userId == currentActiveUserId);
-            
-            if(activeLogs.length === 0) {
-                stream.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျမရှိသေးပါ စာစတင်ရိုက်ပို့နိုင်ပါသည်</p>`;
-                return;
-            }
-
-            let html = '';
-            activeLogs.forEach(log => {
-                let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
-                const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
-                
-                let timeString = "";
-                if (log.time) {
-                    timeString = log.time;
-                } else {
-                    const now = new Date();
-                    timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                }
-                
-                let renderContent = isImage 
-                    ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0;"/>`
-                    : log.text;
-
-                html += `
-                    <div class="message-wrapper">
-                        <div class="message ${sideClass}" style="display: flex; flex-direction: column; gap: 4px;">
-                            <div class="message-content">${renderContent}</div>
-                            <span class="msg-time" style="font-size: 10px; color: #a0aec0; align-self: flex-end; margin-top: 2px; font-weight: normal;">${timeString}</span>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            let isScrollAtBottom = stream.scrollHeight - stream.clientHeight <= stream.scrollTop + 100;
-            stream.innerHTML = html;
-            if(isScrollAtBottom || totalMessagesCount === 0) {
-                stream.scrollTop = stream.scrollHeight;
-            }
-        }
-
-        // ပုံရွေးပြီး Upload လုပ်၍ ပို့မည့် စနစ်
-        async function uploadAndSendChatImage(input) {
-            if (!input.files || !input.files[0] || !currentActiveUserId) return;
-            
-            const file = input.files[0];
-            const formData = new FormData();
-            formData.append('image', file);
-
-            let platform = document.getElementById('det-plat').innerText;
-            let userId = document.getElementById('det-id').innerText;
-
-            try {
-                const res = await fetch('https://api.imgbb.com/1/upload?key=5ad4eff014b84be4fcefeb2430570765', {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await res.json();
-                
-                if(data.success) {
-                    const uploadedUrl = data.data.url;
-                    await fetch(`${BACKEND_URL}/api/send-message`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: uploadedUrl, userId, platform })
-                    });
-                    input.value = "";
-                } else {
-                    alert("ပုံတင်ခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားကြည့်ပါ။");
-                }
-            } catch (err) {
-                console.error("Image Upload Error:", err);
-                alert("ပုံတင်ရာတွင် ချိတ်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
-            }
-        }
-
-        // စာအသစ်ဝင်လာပါက Noti တက်စေပြီး အသံမြည်စေသည့်စနစ်
-        function checkNewIncomingNotification(logs) {
-            if(logs.length > totalMessagesCount) {
-                let lastLog = logs[logs.length - 1];
-                if(lastLog.sender === 'user') {
-                    let senderName = localCustomNames[lastLog.userId] || `User ID: ${lastLog.userId}`;
-                    
-                    let notiBox = document.getElementById('notification-box');
-                    document.getElementById('noti-sender').innerText = `🔔 စာအသစ်ဝင်လာသည် (${senderName})`;
-                    
-                    const isImg = lastLog.text.startsWith('http') && (lastLog.text.match(/\.(jpeg|jpg|gif|png)$/) || lastLog.text.includes('file/bot'));
-                    document.getElementById('noti-text').innerText = isImg ? "📷 Send you a photo" : lastLog.text;
-                    
-                    notiBox.style.display = "flex";
-                    setTimeout(() => notiBox.style.display = "none", 4000);
-                }
-                totalMessagesCount = logs.length;
-            }
-        }
-
-        // နာမည်ပြောင်းပေးနိုင်မည့်စနစ်
-        function editCurrentUserName() {
-            if(!currentActiveUserId) return;
-            let currentId = document.getElementById('det-id').innerText;
-            let currentName = document.getElementById('det-name').innerText;
-            
-            let newName = prompt("ဤအသုံးပြုသူအတွက် သင်စိတ်ကြိုက်ပေးချင်သော နာမည်သစ်ကို ရိုက်ထည့်ပါ -", currentName);
-            
-            if (newName && newName.trim() !== "") {
-                newName = newName.trim();
-                localCustomNames[currentId] = newName;
-                localStorage.setItem('CUSTOM_NAMES', JSON.stringify(localCustomNames));
-                
-                document.getElementById('det-name').innerText = newName;
-                document.getElementById('det-av').innerText = newName.charAt(0);
-                document.getElementById('active-chat-title').innerText = `💬 Chatting with ${newName}`;
-            }
-        }
-
-        // စာရိုက်ပြီး Send နှိပ်လျှင် ထွက်သွားစေမည့်စနစ်
-        async function pushMessage() {
-            let input = document.getElementById('chat-field');
-            let text = input.value.trim();
-            if(text === "" || !currentActiveUserId) return;
-            
-            let platform = document.getElementById('det-plat').innerText;
-            let userId = document.getElementById('det-id').innerText;
-
+        let displayTime = user.time || '';
+        if (!displayTime && (user.unread && user.unread > 0 || user.lastMsg)) {
             const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            displayTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
 
-            let stream = document.getElementById('chat-stream');
-            
-            stream.innerHTML += `
-                <div class="message-wrapper">
-                    <div class="message outgoing" style="display: flex; flex-direction: column; gap: 4px;">
-                        <div class="message-content">${text}</div>
-                        <span class="msg-time" style="font-size: 10px; color: #e0e7ff; align-self: flex-end; margin-top: 2px; font-weight: normal; opacity: 0.8;">${timeString}</span>
-                    </div>
+        html += `
+            <div class="user-item ${activeClass}" id="user-node-${user.id}" onclick="selectUser('${user.name.replace(/'/g, "\\'")}', '${user.platform}', '${user.id}', '${user.gender}')">
+                <div class="avatar">${initial}<div class="platform-badge ${badgeClass}">${platformLabel}</div></div>
+                <div class="user-info">
+                    <div class="user-name">
+                        <span>${displayName} ${unreadBadgeHtml}</span> 
+                        <span class="msg-time">${displayTime}</span>  </div>
+                    <div class="last-msg">${user.lastMsg || ''}</div>
                 </div>
-            `;
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+// လူတစ်ယောက်ကို ရွေးချယ်လိုက်လျှင် လုပ်ဆောင်မည့်အလုပ်
+async function selectUser(name, platform, id, gender) {
+    currentActiveUserId = id;
+    let displayName = localCustomNames[id] || name;
+
+    document.getElementById('active-chat-title').innerText = `💬 Chatting with ${displayName}`;
+    document.getElementById('det-av').innerText = displayName.charAt(0);
+    document.getElementById('det-name').innerText = displayName;
+    document.getElementById('det-id').innerText = id;
+    document.getElementById('det-plat').innerText = platform;
+    document.getElementById('det-gen').innerText = gender;
+
+    document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
+    const currentNode = document.getElementById(`user-node-${id}`);
+    if(currentNode) currentNode.classList.add('active');
+
+    try {
+        await fetch(`${BACKEND_URL}/api/mark-read`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId: id })
+        });
+    } catch (err) {
+        console.log("Read status update skipped");
+    }
+
+    fetch(`${BACKEND_URL}/api/messages`)
+        .then(res => res.json())
+        .then(data => {
+            renderUserList(data.users);
+            renderChatStream(data.logs);
+        });
+}
+
+// စကားပြောခန်းထဲတွင် မက်ဆေ့ခ်ျများ ပြသခြင်း
+function renderChatStream(logs) {
+    if(!currentActiveUserId) return;
+    
+    const stream = document.getElementById('chat-stream');
+    if (!stream) return; // Crash မဖြစ်အောင် ကာကွယ်ခြင်း
+    
+    let activeLogs = logs.filter(log => log.userId == currentActiveUserId);
+    
+    if(activeLogs.length === 0) {
+        stream.innerHTML = `<p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျမရှိသေးပါ စာစတင်ရိုက်ပို့နိုင်ပါသည်</p>`;
+        return;
+    }
+
+    let html = '';
+    activeLogs.forEach(log => {
+        let sideClass = log.sender === 'user' ? 'incoming' : 'outgoing';
+        const isImage = log.text.startsWith('http') && (log.text.match(/\.(jpeg|jpg|gif|png)$/) || log.text.includes('file/bot') || log.text.includes('api.imgbb.com'));
+        
+        let timeString = log.time || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        let renderContent = isImage 
+            ? `<img src="${log.text}" style="max-width: 230px; max-height: 230px; border-radius: 8px; display: block; margin: 4px 0; cursor: pointer;"/>`
+            : log.text;
+
+        html += `
+            <div class="message-wrapper">
+                <div class="message ${sideClass}" style="display: flex; flex-direction: column; gap: 4px;">
+                    <div class="message-content">${renderContent}</div>
+                    <span class="msg-time" style="font-size: 10px; color: #a0aec0; align-self: flex-end; margin-top: 2px; font-weight: normal;">${timeString}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    let isScrollAtBottom = stream.scrollHeight - stream.clientHeight <= stream.scrollTop + 100;
+    stream.innerHTML = html;
+    if(isScrollAtBottom || (typeof totalMessagesCount !== 'undefined' && totalMessagesCount === 0)) {
+        stream.scrollTop = stream.scrollHeight;
+    }
+}
+
+// ပုံရွေးပြီး Upload လုပ်၍ ပို့မည့် စနစ်
+async function uploadAndSendChatImage(input) {
+    if (!input.files || !input.files[0] || !currentActiveUserId) return;
+    
+    const file = input.files[0];
+    const formData = new FormData();
+    formData.append('image', file);
+
+    let platform = document.getElementById('det-plat').innerText;
+    let userId = document.getElementById('det-id').innerText;
+
+    try {
+        const res = await fetch('https://api.imgbb.com/1/upload?key=5ad4eff014b84be4fcefeb2430570765', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+            const uploadedUrl = data.data.url;
+            await fetch(`${BACKEND_URL}/api/send-message`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: uploadedUrl, userId, platform })
+            });
+            if (input.value) input.value = "";
+        } else {
+            alert("ပုံတင်ခြင်း မအောင်မြင်ပါ။ ထပ်မံကြိုးစားကြည့်ပါ။");
+        }
+    } catch (err) {
+        console.error("Image Upload Error:", err);
+        alert("ပုံတင်ရာတွင် ချိတ်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
+    }
+}
+
+// စာအသစ်ဝင်လာပါက Noti တက်စေသည့်စနစ်
+function checkNewIncomingNotification(logs) {
+    if(typeof totalMessagesCount !== 'undefined' && logs.length > totalMessagesCount) {
+        let lastLog = logs[logs.length - 1];
+        if(lastLog.sender === 'user') {
+            let senderName = localCustomNames[lastLog.userId] || `User ID: ${lastLog.userId}`;
             
-            input.value = "";
-            stream.scrollTop = stream.scrollHeight;
-
-            try {
-                await fetch(`${BACKEND_URL}/api/send-message`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text, userId, platform })
-                });
-            } catch (e) {
-                console.error("စာပို့ရန် အခက်အခဲရှိနေသည်:", e);
-            }
-        }
-
-        // Broadcast စနစ်
-        async function executeBroadcast() {
-            const text = document.getElementById('bc-text').value.trim();
-            const imageUrl = document.getElementById('bc-image-url').value.trim();
-
-            if (!text && !imageUrl) {
-                alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ।");
-                return;
-            }
-
-            try {
-                const response = await fetch(`${BACKEND_URL}/api/broadcast`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text, imageUrl })
-                });
+            let notiBox = document.getElementById('notification-box');
+            if (notiBox) {
+                document.getElementById('noti-sender').innerText = `🔔 စာအသစ်ဝင်လာသည် (${senderName})`;
+                const isImg = lastLog.text.startsWith('http') && (lastLog.text.match(/\.(jpeg|jpg|gif|png)$/) || lastLog.text.includes('file/bot'));
+                document.getElementById('noti-text').innerText = isImg ? "📷 Send you a photo" : lastLog.text;
                 
-                if (response.ok) {
-                    alert("📢 Broadcast Message ကို လူတိုင်းဆီ အောင်မြင်စွာ ဖြန့်ဝေပြီးပါပြီဗျာ!");
-                    document.getElementById('bc-text').value = "";
-                    document.getElementById('bc-image-url').value = "";
-                } else {
-                    alert("Broadcast ပို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
-                }
-            } catch (err) {
-                console.error(err);
-                alert("ဆာဗာနှင့် ချိတ်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
+                notiBox.style.display = "flex";
+                setTimeout(() => notiBox.style.display = "none", 4000);
             }
         }
+        totalMessagesCount = logs.length;
+    }
+}
 
-        // Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် စနစ်
+// နာမည်ပြောင်းပေးနိုင်မည့်စနစ်
+function editCurrentUserName() {
+    if(!currentActiveUserId) return;
+    let currentId = document.getElementById('det-id').innerText;
+    let currentName = document.getElementById('det-name').innerText;
+    
+    let newName = prompt("ဤအသုံးပြုသူအတွက် သင်စိတ်ကြိုက်ပေးချင်သော နာမည်သစ်ကို ရိုက်ထည့်ပါ -", currentName);
+    
+    if (newName && newName.trim() !== "") {
+        newName = newName.trim();
+        localCustomNames[currentId] = newName;
+        localStorage.setItem('CUSTOM_NAMES', JSON.stringify(localCustomNames));
+        
+        document.getElementById('det-name').innerText = newName;
+        document.getElementById('det-av').innerText = newName.charAt(0);
+        document.getElementById('active-chat-title').innerText = `💬 Chatting with ${newName}`;
+    }
+}
+
+// စာရိုက်ပြီး Send နှိပ်လျှင် ထွက်သွားစေမည့်စနစ်
+async function pushMessage() {
+    let input = document.getElementById('chat-field');
+    if (!input) return;
+    let text = input.value.trim();
+    if(text === "" || !currentActiveUserId) return;
+    
+    let platform = document.getElementById('det-plat').innerText;
+    let userId = document.getElementById('det-id').innerText;
+
+    const now = new Date();
+    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    let stream = document.getElementById('chat-stream');
+    if (stream) {
+        stream.innerHTML += `
+            <div class="message-wrapper">
+                <div class="message outgoing" style="display: flex; flex-direction: column; gap: 4px;">
+                    <div class="message-content">${text}</div>
+                    <span class="msg-time" style="font-size: 10px; color: #e0e7ff; align-self: flex-end; margin-top: 2px; font-weight: normal; opacity: 0.8;">${timeString}</span>
+                </div>
+            </div>
+        `;
+        stream.scrollTop = stream.scrollHeight;
+    }
+    
+    input.value = "";
+
+    try {
+        await fetch(`${BACKEND_URL}/api/send-message`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, userId, platform })
+        });
+    } catch (e) {
+        console.error("စာပို့ရန် အခက်အခဲရှိနေသည်:", e);
+    }
+}
+
+// Broadcast စနစ်
+async function executeBroadcast() {
+    const text = document.getElementById('bc-text').value.trim();
+    const imageUrl = document.getElementById('bc-image-url').value.trim();
+
+    if (!text && !imageUrl) {
+        alert("❗️ ကျေးဇူးပြု၍ စာသား သို့မဟုတ် ပုံလင့်ခ် တစ်ခုခု ရိုက်ထည့်ပေးပါဗျာ।");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/api/broadcast`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, imageUrl })
+        });
+        
+        if (response.ok) {
+            alert("📢 Broadcast Message ကို လူတိုင်းဆီ အောင်မြင်စွာ ဖြန့်ဝေပြီးပါပြီဗျာ!");
+            document.getElementById('bc-text').value = "";
+            document.getElementById('bc-image-url').value = "";
+        } else {
+            alert("Broadcast ပို့ဆောင်မှု မအောင်မြင်ပါ။ ဆာဗာအခြေအနေကို စစ်ဆေးပါ။");
+        }
+    } catch (err) {
+        console.error(err);
+        alert("ဆာဗာနှင့် ချိတ်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
+    }
+}
+
+// Demo Noti Test ခလုတ်နှိပ်လျှင် အလုပ်လုပ်ရန် စနစ်
 function triggerDemoNotification() { 
     const sound = document.getElementById('noti-sound'); 
     const notiBox = document.getElementById('notification-box');
@@ -711,12 +714,9 @@ function triggerDemoNotification() {
                 const ctx = new AudioContext();
                 const source = ctx.createMediaElementSource(sound);
                 const gainNode = ctx.createGain();
-
                 gainNode.gain.value = 3.0; 
-
                 source.connect(gainNode);       
                 gainNode.connect(ctx.destination); 
-
                 sound._gainNode = gainNode; 
             }
         } catch (ae) { 
@@ -724,7 +724,7 @@ function triggerDemoNotification() {
         }
 
         sound.play().catch(error => {
-            console.log("Browser က အသံကို ပိတ်ထားသဖြင့် ကလစ်နှိပ်ရန် စောင့်ဆိုင်းနေပါသည်...");
+            console.log("Browser မှ အသံပိတ်ထားသဖြင့် စောင့်ဆိုင်းနေပါသည်...");
             document.body.addEventListener('click', () => { sound.play(); }, { once: true });
         });
     }
@@ -733,41 +733,41 @@ function triggerDemoNotification() {
         document.getElementById('noti-sender').innerText = "🔔 စနစ်စမ်းသပ်မှု အောင်မြင်သည်";
         document.getElementById('noti-text').innerText = "စနစ်မှ အသံနှင့် Notification ကောင်းမွန်စွာ အလုပ်လုပ်နေပါသည်ဗျာ!";
         notiBox.style.display = "flex";
-
-        setTimeout(() => {
-            notiBox.style.display = "none";
-        }, 5000);
+        setTimeout(() => { notiBox.style.display = "none"; }, 5000);
     }
 }
-        // Noti အသံမြည်သည့် Function
-        function playNotificationSound() {
-            try {
-                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                if (!AudioContext) return;
-                
-                const ctx = new AudioContext();
-                const oscillator = ctx.createOscillator();
-                const gainNode = ctx.createGain(); 
 
-                oscillator.type = 'sine'; 
-                oscillator.frequency.setValueAtTime(587.33, ctx.currentTime); 
-                
-                gainNode.gain.setValueAtTime(100.0, ctx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); 
+// Noti အသံမြည်သည့် Function
+function playNotificationSound() {
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        
+        const ctx = new AudioContext();
+        const oscillator = ctx.createOscillator();
+        const gainNode = ctx.createGain(); 
 
-                oscillator.connect(gainNode);
-                gainNode.connect(ctx.destination);
+        oscillator.type = 'sine'; 
+        oscillator.frequency.setValueAtTime(587.33, ctx.currentTime); 
+        
+        gainNode.gain.setValueAtTime(100.0, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); 
 
-                oscillator.start();
-                oscillator.stop(ctx.currentTime + 0.15);
-            } catch (error) {
-                console.log("Audio play blocked or error:", error);
-            }
-        }
-        <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
+        oscillator.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        oscillator.start();
+        oscillator.stop(ctx.currentTime + 0.15);
+    } catch (error) {
+        console.log("Audio play blocked or error:", error);
+    }
+}
+</script>
+
+<div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
     <span class="zoom-close-btn" onclick="closeImageZoomModal()">&times;</span>
     <img class="zoom-modal-content" id="zoom-target-src" src="">
 </div>
-    </script>
+
 </body>
 </html>
