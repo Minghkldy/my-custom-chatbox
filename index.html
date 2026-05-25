@@ -209,10 +209,6 @@
         <button type="button" id="toggle-fb-verify" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer;">👁️</button>
     </div>
 </div> <button class="btn-primary" onclick="saveSingleSetting('fb')" style="background-color: #006aff;">Save Facebook Settings Only 💬</button>
-    <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
-    <span class="zoom-close-btn" onclick="closeImageZoomModal()">&times;</span>
-    <img class="zoom-modal-content" id="zoom-target-src">
-</div>
 
     <script>
         // 🔗 မိတ်ဆွေ၏ Live ဖြစ်သွားသော Render URL အစစ်အမှန်
@@ -762,6 +758,10 @@ function triggerDemoNotification() {
                 console.log("Audio play blocked or error:", error);
             }
         }
+        <div id="zoom-img-modal" class="image-zoom-modal" style="display: none;">
+    <span class="zoom-close-btn" onclick="closeImageZoomModal()">&times;</span>
+    <img class="zoom-modal-content" id="zoom-target-src" src="">
+</div>
     </script>
 </body>
 </html>
