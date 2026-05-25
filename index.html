@@ -300,7 +300,7 @@
             document.getElementById('chat-stream').addEventListener('click', function(e) {
                 if (e.target && e.target.tagName === 'IMG') {
                     // 🚀 အကယ်၍ နှိပ်လိုက်မိသည့်ပုံသည် Setting Group, Button သို့မဟုတ် h3 ခေါင်းစဉ်ထဲကပုံဖြစ်နေပါက လုံးဝ အကြီးမချဲ့ရန် ကျော်သွားမည်
-                    if (e.target.closest('button') || e.target.closest('.form-group') || e.target.closest('h3')) {
+                    if (e.target.closest('button') || e.target.closest('.form-group') || e.target.closest('h3') || e.target.closest('.setting-icon') || e.target.closest('#setting-icon')) {
                         return; 
                     }
                     // တကယ့် Chat Message ထဲက ပုံဆိုရင်တော့ ပုံကြီးချဲ့ပေးမည်
@@ -385,12 +385,24 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
             }
         }
 
-        // 🆕 Image Zoom Modal ဖွင့်ရန် Function
+        // 🆕 [ID အမှားပြင်ပြီး] Image Zoom Modal ဖွင့်ရန် Function
         function openImageZoomModal(imgSrc) {
             const modal = document.getElementById('zoom-img-modal');
-            const modalImg = document.getElementById('zoom-target-src');
-            modal.style.display = "block";
-            modalImg.src = imgSrc;
+            
+            // HTML ထဲမှာ ID ဘယ်လိုပဲရှိရှိ အလုပ်လုပ်အောင် နှစ်မျိုးလုံးကို စစ်ထုတ်ပြီး ဖမ်းခိုင်းထားပါတယ်
+            let modalImg = document.getElementById('zoom-target-src') || document.getElementById('zoom-img-content');
+            
+            // အကယ်၍ အပေါ်က ID နှစ်ခုလုံး opacity သို့မဟုတ် ရှာမတွေ့ခဲ့ရင် HTML ထဲက မော်ဒယ်သေတ္တာထဲမှာ ရှိသမျှ <img> ကို အလိုအလျောက် လိုက်ရှာခိုင်းတဲ့စနစ်
+            if (!modalImg && modal) {
+                modalImg = modal.querySelector('img'); 
+            }
+
+            if (modal && modalImg) {
+                modalImg.src = imgSrc;
+                modal.style.display = "flex"; // ပုံစံမပျက် ဗဟိုတည့်တည့်မှာ ပေါ်လာစေရန် flex သုံးထားပါတယ်
+            } else if (modal) {
+                modal.style.display = "block";
+            }
         }
 
         // 🆕 Image Zoom Modal ปိတ်ရန် Function
@@ -691,7 +703,7 @@ setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
                 }
             } catch (err) {
                 console.error(err);
-                alert("ဆာဗာနှင့် ချိတ်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
+                alert("ဆာဗာနှင့် ချက်ဆက်မှု အမှားအယွင်းရှိနေပါသည်။");
             }
         }
 
