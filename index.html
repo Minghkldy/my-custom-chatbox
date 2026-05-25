@@ -38,15 +38,7 @@
         .chat-header { height: 60px; background-color: #111827; border-bottom: 1px solid #1f2937; display: flex; align-items: center; padding: 0 20px; font-weight: bold; justify-content: space-between; }
         .chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
         .message-wrapper { display: flex; flex-direction: column; width: 100%; }
-      .message { 
-    padding: 10px 16px; 
-    border-radius: 12px; 
-    max-width: 65%; 
-    font-size: 14px; 
-    line-height: 1.4; 
-    word-break: break-word; 
-    white-space: pre-wrap !important; /* 👈 !important ပါ ထည့်ပေးလိုက်ရင် စာစီတာ (Enter ဆင်းတာ) ရာနှုန်းပြည့် ရသွားပါလိမ့်မယ် */
-}
+        .message { padding: 10px 16px; border-radius: 12px; max-width: 65%; font-size: 14px; line-height: 1.4; word-break: break-word; white-space: pre-wrap !important; }
         .message.incoming { background-color: #1e293b; color: #f3f4f6; align-self: flex-start; border-bottom-left-radius: 2px; }
         .message.outgoing { background-color: #2563eb; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
         .message img {
@@ -129,23 +121,36 @@
                     <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>
                 </div>
             </div>
-
-            <div class="chat-area">
-                <div class="chat-header">
-                    <span id="active-chat-title">💬 Please select a conversation</span>
-                </div>
-                <div class="chat-messages" id="chat-stream">
-                    <p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျများကို ဖတ်ရှုရန် လူတစ်ဦးအား ရွေးချယ်ပေးပါ</p>
-                </div>
-                <div class="chat-input-container">
-                    <label for="chat-image-file" style="cursor: pointer; font-size: 20px; color: #9ca3af; user-select: none; transition: 0.2s;" title="Upload Photo">📎</label>
-                    <input type="file" id="chat-image-file" accept="image/*" style="display: none;" onchange="uploadAndSendChatImage(this)">
-                    
-                    <input type="text" id="chat-field" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') pushMessage()">
-                    <button onclick="pushMessage()">Send</button>
-                </div>
+<div class="sidebar-header">
+                <span>UWINMM Inbox</span>
+                <button onclick="triggerDemoNotification()" style="font-size: 11px; background: #1f2937; border: 1px solid #374151;">Noti Test 🔔</button>
             </div>
 
+            <div style="padding: 10px 15px; border-bottom: 1px solid #1f2937;">
+                <input type="text" id="user-search-input" placeholder="🔍 Search customers..." 
+                       style="width: 100%; padding: 10px 12px; background-color: #1f2937; color: white; border: 1px solid #374151; border-radius: 8px; font-size: 13px; outline: none;">
+            </div>
+
+            <div class="user-list" id="users-container">
+                <p style="text-align: center; color: #6b7280; margin-top: 20px; font-size: 13px;">No conversations yet...</p>
+            </div>
+        </div> <div class="chat-area">
+            <div class="chat-header">
+                <span id="active-chat-title">💬 Please select a conversation</span>
+            </div>
+            
+            <div class="chat-messages" id="chat-stream">
+                <p style="text-align: center; color: #6b7280; margin-top: 40px;">မက်ဆေ့ခ်ျများကို ဖတ်ရှုရန် လူတစ်ဦးအား ရွေးချယ်ပေးပါ</p>
+            </div>
+
+            <div class="chat-input-container">
+               <label for="chat-image-file" style="cursor: pointer; font-size: 20px; color: #9ca3af; user-select: none; transition: 0.2s; margin-right: 5px;">📎</label>
+                <input type="file" id="chat-image-file" accept="image/*" style="display: none;" onchange="uploadAndSendChatImage(this)">
+                
+                <input type="text" id="chat-field" placeholder="Type a message..." onkeypress="if(event.key === 'Enter') pushMessage()">
+                <button onclick="pushMessage()">Send</button>
+            </div>
+        </div> ```
             <div class="details-sidebar">
                 <div class="details-avatar" id="det-av">?</div>
                 <div class="details-name-box">
@@ -316,6 +321,21 @@
                     closeImageZoomModal();
                 }
             });
+            // 🔍 ဤနေရာတွင် Search Bar စနစ်ကို တိုက်ရိုက် ညှပ်ထည့်ပါ
+            const searchInput = document.getElementById('user-search-input');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const keyword = e.target.value.toLowerCase().trim();
+                    const userItems = document.querySelectorAll('.user-item');
+                    userItems.forEach(item => {
+                        const userNameText = item.querySelector('.user-name span').textContent.toLowerCase();
+                        if (userNameText.includes(keyword)) {
+                            item.style.display = 'flex';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
 
             // 📷 ညှပ်ထည့်ချက် - Send Box တွင် ပုံများကို Copy Paste (Ctrl + V) ချ၍ ပို့နိုင်မည့်စနစ်သစ်
             const chatField = document.getElementById('chat-field');
@@ -666,12 +686,28 @@ function triggerDemoNotification() {
         sound.volume = 1.0;  // 👈 အသံပမာဏကို ၁၀၀% အပြည့်ဖွင့်ခိုင်းခြင်း
         sound.currentTime = 0; // အသံကို အစကနေ ပြန်စဖွင့်ခြင်း
         
-        // Browser က အသံပိတ်ထားခြင်းကို ကျော်လွှားရန် Play စနစ်
+        // 🔊 အသံလှိုင်းကို ၂ ဆမှ ၃ ဆအထိ ထပ်မံချဲ့ထွင်၍ ဖွင့်ပေးမည့် စနစ်သစ်
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext && !sound._gainNode) {
+                const ctx = new AudioContext();
+                const source = ctx.createMediaElementSource(sound);
+                const gainNode = ctx.createGain();
+                
+                // 🚀 အသံအကျယ်အဝန်း ပမာဏ (လက်ရှိထက် ၃ ဆ ပိုကျယ်စေရန်)
+                gainNode.gain.value = 3.0; 
+                
+                source.connect(gainNode);
+                gainNode.connect(ctx.destination);
+                sound._gainNode = gainNode; // တူညီသော Node ထပ်မပွားစေရန် သိမ်းထားခြင်း
+            }
+        } catch (ae) { console.log(ae); }
+
+        // အသံကို စတင်ဖွင့်ခြင်း
         sound.play().catch(error => {
             console.log("Browser က အသံကို ပိတ်ထားသဖြင့် ကလစ်နှိပ်ရန် စောင့်ဆိုင်းနေပါသည်...");
             document.body.addEventListener('click', () => { sound.play(); }, { once: true });
         });
-    }
 
     // Noti Pop-up Box အပေါ်တွင် စာသားများ ပြသခြင်း
     if (notiBox) {
@@ -685,6 +721,34 @@ function triggerDemoNotification() {
         }, 4000);
     }
 }
+            // 🔊 အသံချဲ့စနစ်ပါဝင်သော မိတ်ဆွေသစ် Noti အသံမြည်သည့် Function
+        function playNotificationSound() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                
+                const ctx = new AudioContext();
+                const oscillator = ctx.createOscillator();
+                const gainNode = ctx.createGain(); // အသံချဲ့စက် Node
+
+                oscillator.type = 'sine'; 
+                oscillator.frequency.setValueAtTime(587.33, ctx.currentTime); // D5 Note (ကြည်လင်ပြတ်သားသော အသံ)
+
+                // 🚀 အသံပမာဏကို လက်ရှိထက် ၃ ဆ ပိုကျယ်စေရန် ပြင်ဆင်ထားပါသည် (4.0 သို့မဟုတ် 5.0 ထိ တိုးနိုင်သည်)
+                const volumeLevel = 3.0; 
+                
+                gainNode.gain.setValueAtTime(volumeLevel, ctx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.15); 
+
+                oscillator.connect(gainNode);
+                gainNode.connect(ctx.destination);
+
+                oscillator.start();
+                oscillator.stop(ctx.currentTime + 0.15);
+            } catch (error) {
+                console.log("Audio play blocked or error:", error);
+            }
+        }
     </script>
 </body>
 </html>
