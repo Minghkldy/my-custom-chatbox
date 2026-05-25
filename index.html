@@ -287,73 +287,100 @@
             }
         }
 
-        // စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
-        window.onload = function() {
-            if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
-            if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
-            if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
-            
-            fetchLiveUpdates();
+        alert("Server သို့ ချိတ်ဆက်ရန် အခက်အခဲရှိနေသော်လည်း Browser တွင် မှတ်သားထားပြီးဖြစ်ပါသည်။");
+    }
+}
 
-            document.getElementById('chat-stream').addEventListener('click', function(e) {
-                if (e.target && e.target.tagName === 'IMG') {
-                    openImageZoomModal(e.target.src);
+// စာမျက်နှာပွင့်လာလျှင် ယခင်သိမ်းထားဖူးသော Token များ ပြန်ဖော်ပေးရန်
+window.onload = function() {
+    if(localStorage.getItem('TG_TOKEN')) document.getElementById('storage-tg-token').value = localStorage.getItem('TG_TOKEN');
+    if(localStorage.getItem('FB_TOKEN')) document.getElementById('storage-fb-token').value = localStorage.getItem('FB_TOKEN');
+    if(localStorage.getItem('FB_VERIFY')) document.getElementById('storage-fb-verify').value = localStorage.getItem('FB_VERIFY');
+
+    fetchLiveUpdates();
+
+    // --- API Token များအား မျက်လုံးအဖွင့်အပိတ်စနစ်ဖြင့် ပြသရန်/ဝှက်ရန် ပေါင်းထည့်ထားသောအပိုင်း ---
+    function setupTokenToggle(inputId, toggleButtonId) {
+        const inputField = document.getElementById(inputId);
+        const toggleButton = document.getElementById(toggleButtonId);
+
+        if (inputField && toggleButton) {
+            toggleButton.addEventListener('click', function () {
+                if (inputField.type === 'password') {
+                    inputField.type = 'text';
+                    toggleButton.textContent = '🙈'; // ဝှက်ရန် Icon ပြောင်းမည်
+                } else {
+                    inputField.type = 'password';
+                    toggleButton.textContent = '👁️'; // ပြန်ပြရန် Icon ပြောင်းမည်
                 }
             });
+        }
+    }
 
-            document.getElementById('zoom-img-modal').addEventListener('click', function(e) {
-                if (e.target.id === 'zoom-img-modal') {
-                    closeImageZoomModal();
-                }
-            });
-            
-            // 🔍 ဤနေရာတွင် Search Bar စနစ်ကို တိုက်ရိုက် ညှပ်ထည့်ပါ
-            const searchInput = document.getElementById('user-search-input');
-            if (searchInput) {
-                searchInput.addEventListener('input', function(e) {
-                    const keyword = e.target.value.toLowerCase().trim();
-                    const userItems = document.querySelectorAll('.user-item');
-                    userItems.forEach(item => {
-                        const userNameText = item.querySelector('.user-name span').textContent.toLowerCase();
-                        if (userNameText.includes(keyword)) {
-                            item.style.display = 'flex';
-                        } else {
-                            item.style.display = 'none';
-                        }
-                    });
-                });
+    // HTML ဘက်တွင် သတ်မှတ်မည့် ခလုတ် ID များနှင့် ချိတ်ဆက်ခြင်း
+    setupTokenToggle('storage-tg-token', 'toggle-tg-token');
+    setupTokenToggle('storage-fb-token', 'toggle-fb-token');
+    setupTokenToggle('storage-fb-verify', 'toggle-fb-verify');
+    // --------------------------------------------------------------------------------
+
+    document.getElementById('chat-stream').addEventListener('click', function(e) {
+        if (e.target && e.target.tagName === 'IMG') {
+            openImageZoomModal(e.target.src);
+        }
+    });
+};
+
+document.getElementById('zoom-img-modal').addEventListener('click', function(e) {
+    if (e.target.id === 'zoom-img-modal') {
+        closeImageZoomModal();
+    }
+});
+
+// 🔍 ဤနေရာတွင် Search Bar စနစ်ကို တိုက်ရိုက် ညှပ်ထည့်ပါ
+const searchInput = document.getElementById('user-search-input');
+if (searchInput) {
+    searchInput.addEventListener('input', function(e) {
+        const keyword = e.target.value.toLowerCase().trim();
+        const userItems = document.querySelectorAll('.user-item');
+        userItems.forEach(item => {
+            const userNameText = item.querySelector('.user-name span').textContent.toLowerCase();
+            if (userNameText.includes(keyword)) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
             }
+        });
+    });
+}
 
-            // 📷 ညှပ်ထည့်ချက် - Send Box တွင် ပုံများကို Copy Paste (Ctrl + V) ချ၍ ပို့နိုင်မည့်စနစ်သစ်
-            const chatField = document.getElementById('chat-field');
-            if (chatField) {
-                chatField.addEventListener('paste', async function(e) {
-                    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                    for (let index in items) {
-                        const item = items[index];
-                        if (item.kind === 'file' && item.type.startsWith('image/')) {
-                            // ပုံတွေ့ရှိပါက Clipboard ထဲမှ ပုံဖိုင်ကို ဆွဲယူခြင်း
-                            const blob = item.getAsFile();
-                            
-                            // အသုံးပြုသူအား ပုံပို့နေပြီဖြစ်ကြောင်း သိစေရန် အချက်ပြခြင်း
-                            chatField.placeholder = "📷 Uploading image, please wait...";
-                            chatField.disabled = true;
+// ⌨️ ဒါကတော့ အစ်ကို့ပုံထဲက လိုင်းနံပါတ် ၃၂၅ က စတဲ့ ပုံ Copy Paste စနစ်ဖြစ်ပါတယ်
+// ညှပ်ထည့်ချက် - Send Box တွင် ပုံများကို Copy Paste (Ctrl + V) ချ၍ ပို့နိုင်မည့်စနစ်သစ်
+const chatField = document.getElementById('chat-field');
+if (chatField) {
+    chatField.addEventListener('paste', async function(e) {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+                // ပုံတွေ့ရှိပါက Clipboard ထဲမှ ပုံကို ဆွဲယူခြင်း
+                const blob = item.getAsFile();
 
-                            // စနစ်ဟောင်းထဲက uploadAndSendChatImage စနစ်ဆီသို့ Form ဒေတာဖြင့် လွှဲပြောင်းပို့ဆောင်ခြင်း
-                            const mockInput = { files: [blob] };
-                            await uploadAndSendChatImage(mockInput);
+                // အသုံးပြုသူအား ပုံပို့နေပြီဖြစ်ကြောင်း သိစေရန် အချက်ပြခြင်း
+                chatField.placeholder = "📸 Uploading image, please wait...";
+                chatField.disabled = true;
 
-                            // ပုံပို့ပြီးပါက Send Box ကို ပုံမှန်အတိုင်း ပြန်ပြင်ခြင်း
-                            chatField.placeholder = "Type a message...";
-                            chatField.disabled = false;
-                            chatField.focus();
-                            
-                            e.preventDefault(); // စာရိုက်ကွက်ထဲတွင် [object File] ဟု စာသားပေါ်မလာစေရန် တားဆီးခြင်း
-                        }
-                    }
-                });
+                // စနစ်ဟောင်းထဲက uploadAndSendChatImage စနစ်ဆီသို့ Form အောက်ဖြင့် လွှဲပြောင်းပို့ဆောင်ခြင်း
+                const mockInput = { files: [blob] };
+                await uploadAndSendChatImage(mockInput);
+                
+                // ပုံပို့ပြီးပါက Send Box ကို ပုံမှန်အတိုင်း ပြန်ပြင်ခြင်း
+                chatField.placeholder = "Type a message...";
+                chatField.disabled = false;
+                chatField.focus();
             }
         }
+    });
+}
 
         // 🆕 Image Zoom Modal ဖွင့်ရန် Function
         function openImageZoomModal(imgSrc) {
